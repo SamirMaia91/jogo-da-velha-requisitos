@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Faz a página se adaptar a celulares e tablets -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Jogo da Velha - UNIFOR</title>
+
+    <style>
+        /* =========================================================
+           VARIÁVEIS DE CORES
+           ========================================================= */
+        :root {
+            --azul-unifor: #003366;
+            --azul-destaque: #0056b3;
+            --laranja: #d97706;
+            --fundo: #f4f6f9;
+            --branco: #ffffff;
+            --cinza: #64748b;
+            --borda: #dbe2ea;
+            --verde: #16a34a;
+        }
+
+        /* =========================================================
+           CONFIGURAÇÕES GERAIS
+           ========================================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--fundo);
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--azul-unifor);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 24px;
+        }
+
+        /* =========================================================
+           CONTAINER PRINCIPAL
+           ========================================================= */
+        .container {
+            width: 100%;
+            max-width: 720px;
+            background: var(--branco);
+
+            border-radius: 20px;
+            padding: 30px;
+
+            box-shadow: 0 10px 35px rgba(0, 51, 102, 0.12);
+
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* =========================================================
+           CABEÇALHO
+           ========================================================= */
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .institucional {
+            color: var(--azul-destaque);
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 7px;
+        }
+
+        h1 {
+            color: var(--azul-unifor);
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+
+        /* =========================================================
+           CONFIGURAÇÕES DO JOGO
+           ========================================================= */
+        .configuracoes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .campo-config {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .campo-config label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--cinza);
+        }
+
+        select {
+            width: 100%;
+            padding: 11px 12px;
+
+            border: 1px solid var(--borda);
+            border-radius: 8px;
+
+            background: white;
+            color: var(--azul-unifor);
+
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: 2px solid rgba(0, 86, 179, 0.2);
+            border-color: var(--azul-destaque);
+        }
+
+        /* =========================================================
+           PLACAR
+           ========================================================= */
+        .placar {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+
+            background: #f8fafc;
+            border: 1px solid var(--borda);
+
+            border-radius: 14px;
+            padding: 18px;
+
+            margin-bottom: 20px;
+        }
+
+        .jogador-placar {
+            text-align: center;
+        }
+
+        .jogador-placar .nome {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--cinza);
+        }
+
+        .jogador-placar .pontos {
+            display: block;
+            margin-top: 5px;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        #scoreX {
+            color: var(--azul-destaque);
+        }
+
+        #scoreO {
+            color: var(--laranja);
+        }
+
+        .rodada {
+            text-align: center;
+            padding: 0 25px;
+        }
+
+        .rodada span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--cinza);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        #roundDisplay {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--azul-unifor);
+        }
+
+        /* =========================================================
+           STATUS
+           ========================================================= */
+        .status {
+            min-height: 35px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            text-align: center;
+
+            font-weight: bold;
+            color: var(--azul-unifor);
+
+            margin-bottom: 18px;
+        }
+
+        /* =========================================================
+           TABULEIRO
+           ========================================================= */
+        .board-container {
+            width: min(400px, 90vw);
+            aspect-ratio: 1 / 1;
+
+            margin: 0 auto 25px;
+
+            position: relative;
+        }
+
+        .board {
+            width: 100%;
+            height: 100%;
+
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+
+            gap: 8px;
+
+            background: var(--azul-unifor);
+            padding: 8px;
+
+            border-radius: 12px;
+        }
+
+        /* Cada uma das 9 células */
+        .cell {
+            border: none;
+            border-radius: 7px;
+
+            background: white;
+
+            font-size: clamp(2.5rem, 10vw, 4.5rem);
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.12s ease,
+                background 0.12s ease;
+        }
+
+        .cell:hover:not(:disabled) {
+            background: #eef5fb;
+            transform: scale(0.97);
+        }
+
+        .cell:disabled {
+            cursor: default;
+        }
+
+        /* Cor do X */
+        .cell.x {
+            color: var(--azul-destaque);
+        }
+
+        /* Cor do O */
+        .cell.o {
+            color: var(--laranja);
+        }
+
+        /* =========================================================
+           LINHA DE VITÓRIA
+           
+           Essa linha é posicionada sobre o tabuleiro.
+           O JavaScript calcula o tamanho e o ângulo.
+           ========================================================= */
+        .win-line {
+            position: absolute;
+
+            height: 6px;
+
+            background: var(--laranja);
+
+            border-radius: 10px;
+
+            transform-origin: left center;
+
+            opacity: 0;
+            pointer-events: none;
+
+            z-index: 5;
+
+            transition: opacity 0.25s ease;
+        }
+
+        .win-line.visible {
+            opacity: 1;
+        }
+
+        /* =========================================================
+           BOTÃO REINICIAR
+           ========================================================= */
+        .restart {
+            display: block;
+
+            margin: 0 auto;
+
+            padding: 13px 25px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: var(--azul-unifor);
+            color: white;
+
+            font-size: 0.9rem;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.1s ease;
+        }
+
+        .restart:hover {
+            background: var(--azul-destaque);
+        }
+
+        .restart:active {
+            transform: scale(0.97);
+        }
+
+        /* =========================================================
+           MENSAGEM FINAL
+           ========================================================= */
+        .final-message {
+            color: var(--verde);
+        }
+
+        /* =========================================================
+           CANVAS DOS CONFETES
+           ========================================================= */
+        #confettiCanvas {
+            position: fixed;
+            inset: 0;
+
+            width: 100vw;
+            height: 100vh;
+
+            pointer-events: none;
+
+            z-index: 9999;
+        }
+
+        /* =========================================================
+           RESPONSIVIDADE
+           ========================================================= */
+        @media (max-width: 550px) {
+
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .configuracoes {
+                grid-template-columns: 1fr;
+            }
+
+            .placar {
+                padding: 13px 8px;
+            }
+
+            .rodada {
+                padding: 0 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================================================
+         CANVAS UTILIZADO PARA A ANIMAÇÃO DE CONFETES
+         ========================================================= -->
+    <canvas id="confettiCanvas"></canvas>
+
+
+    <main class="container">
+
+        <!-- =====================================================
+             CABEÇALHO
+             ===================================================== -->
+        <header>
+            <div class="institucional">
+                UNIVERSIDADE DE FORTALEZA
+            </div>
+
+            <h1>JOGO DA VELHA</h1>
+        </header>
+
+
+        <!-- =====================================================
+             SELETORES DE CONFIGURAÇÃO
+             ===================================================== -->
+        <section class="configuracoes">
+
+            <div class="campo-config">
+                <label for="modeSelect">
+                    Modo de Jogo
+                </label>
+
+                <select id="modeSelect">
+                    <option value="pvp">
+                        2 Jogadores (PVP)
+                    </option>
+
+                    <option value="cpu">
+                        Contra o Computador
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="campo-config">
+                <label for="formatSelect">
+                    Formato da Partida
+                </label>
+
+                <select id="formatSelect">
+                    <option value="single">
+                        Partida Única
+                    </option>
+
+                    <option value="bo3">
+                        Melhor de 3 (MD3)
+                    </option>
+                </select>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PLACAR
+             ===================================================== -->
+        <section class="placar">
+
+            <div class="jogador-placar">
+                <span class="nome">
+                    JOGADOR X
+                </span>
+
+                <span class="pontos" id="scoreX">
+                    0
+                </span>
+            </div>
+
+
+            <div class="rodada">
+                <span>
+                    RODADA
+                </span>
+
+                <strong id="roundDisplay">
+                    1/1
+                </strong>
+            </div>
+
+
+            <div class="jogador-placar">
+                <span class="nome" id="playerOLabel">
+                    JOGADOR O
+                </span>
+
+                <span class="pontos" id="scoreO">
+                    0
+                </span>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             STATUS DO JOGO
+             ===================================================== -->
+        <div class="status" id="status">
+            Vez do Jogador X
+        </div>
+
+
+        <!-- =====================================================
+             TABULEIRO
+             ===================================================== -->
+        <div class="board-container">
+
+            <div class="board" id="board">
+
+                <!--
+                    As 9 células são identificadas de 0 a 8.
+
+                    Índices:
+
+                    0 | 1 | 2
+                    ---------
+                    3 | 4 | 5
+                    ---------
+                    6 | 7 | 8
+                -->
+
+                <button class="cell" data-index="0"></button>
+                <button class="cell" data-index="1"></button>
+                <button class="cell" data-index="2"></button>
+
+                <button class="cell" data-index="3"></button>
+                <button class="cell" data-index="4"></button>
+                <button class="cell" data-index="5"></button>
+
+                <button class="cell" data-index="6"></button>
+                <button class="cell" data-index="7"></button>
+                <button class="cell" data-index="8"></button>
+
+            </div>
+
+
+            <!--
+                Linha visual utilizada quando existe uma vitória.
+                O JavaScript calcula posição, tamanho e rotação.
+            -->
+            <div class="win-line" id="winLine"></div>
+
+        </div>
+
+
+        <!-- =====================================================
+             BOTÃO DE REINÍCIO
+             ===================================================== -->
+        <button class="restart" id="restartButton">
+            REINICIAR JOGO
+        </button>
+
+    </main>
+
+
+    <script>
+
+        /* =========================================================
+           1. ELEMENTOS DA INTERFACE
+           ========================================================= */
+
+        const cells = document.querySelectorAll(".cell");
+
+        const statusElement = document.getElementById("status");
+
+        const scoreXElement = document.getElementById("scoreX");
+        const scoreOElement = document.getElementById("scoreO");
+
+        const roundDisplay = document.getElementById("roundDisplay");
+
+        const modeSelect = document.getElementById("modeSelect");
+        const formatSelect = document.getElementById("formatSelect");
+
+        const playerOLabel = document.getElementById("playerOLabel");
+
+        const restartButton = document.getElementById("restartButton");
+
+        const boardContainer = document.querySelector(".board-container");
+
+        const winLine = document.getElementById("winLine");
+
+
+        /* =========================================================
+           2. ESTADO DO JOGO
+           ========================================================= */
+
+        /*
+         * Representação lógica do tabuleiro.
+         *
+         * Exemplo:
+         *
+         * ['X', '', 'O',
+         *  '', 'X', '',
+         *  'O', '', '']
+         */
+
+        let options = Array(9).fill("");
+
+
+        /*
+         * Jogador que possui o turno atual.
+         *
+         * Pode ser:
+         * X ou O
+         */
+        let currentPlayer = "X";
+
+
+        /*
+         * Indica se o tabuleiro está aceitando jogadas.
+         *
+         * true  = jogo ativo
+         * false = jogo bloqueado
+         */
+        let running = true;
+
+
+        /*
+         * Placar acumulado.
+         */
+        let winsX = 0;
+        let winsO = 0;
+
+
+        /*
+         * Número da rodada atual.
+         */
+        let currentRound = 1;
+
+
+        /*
+         * Configurações selecionadas.
+         */
+        let modeSelectValue = "pvp";
+        let formatSelectValue = "single";
+
+
+        /*
+         * Guarda se existe uma rodada em andamento.
+         */
+        let roundFinished = false;
+
+
+        /* =========================================================
+           3. MATRIZES DE VITÓRIA
+           =========================================================
+
+           Existem exatamente 8 combinações possíveis:
+
+           3 linhas
+           3 colunas
+           2 diagonais
+        */
+
+        const winPatterns = [
+
+            // Linhas
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+
+            // Colunas
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+
+            // Diagonais
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+
+        /* =========================================================
+           4. EVENTOS DOS BOTÕES DO TABULEIRO
+           ========================================================= */
+
+        cells.forEach(cell => {
+
+            cell.addEventListener("click", () => {
+
+                const index = Number(cell.dataset.index);
+
+                playMove(index);
+
+            });
+
+        });
+
+
+        /* =========================================================
+           5. REALIZA UMA JOGADA
+           ========================================================= */
+
+        function playMove(index) {
+
+            /*
+             * RF-03 / CA-02
+             *
+             * Impede jogadas quando:
+             *
+             * - a partida não está ativa;
+             * - a célula já está preenchida;
+             */
+            if (!running || options[index] !== "") {
+                return;
+            }
+
+
+            /*
+             * Registra a jogada.
+             */
+            options[index] = currentPlayer;
+
+
+            /*
+             * Atualiza visualmente a célula.
+             */
+            updateCell(index);
+
+
+            /*
+             * Emite o som correspondente ao símbolo.
+             *
+             * RF-04 / CA-07
+             */
+            playMoveSound(currentPlayer);
+
+
+            /*
+             * Verifica vitória.
+             *
+             * RF-05
+             */
+            const winningPattern = checkWinner();
+
+
+            /*
+             * Se houver vencedor, termina a rodada.
+             */
+            if (winningPattern) {
+
+                finishRoundWithWinner(
+                    currentPlayer,
+                    winningPattern
+                );
+
+                return;
+            }
+
+
+            /*
+             * Se todas as casas estiverem ocupadas
+             * e não houver vencedor, temos empate.
+             *
+             * E1
+             */
+            if (checkDraw()) {
+
+                finishRoundWithDraw();
+
+                return;
+            }
+
+
+            /*
+             * Caso não tenha terminado,
+             * alternamos o jogador.
+             */
+            currentPlayer =
+                currentPlayer === "X" ? "O" : "X";
+
+
+            /*
+             * Atualiza a mensagem.
+             */
+            updateStatus();
+
+
+            /*
+             * Se estiver no modo CPU e for a vez do O,
+             * o computador realiza sua jogada.
+             *
+             * A2
+             */
+            if (
+                modeSelectValue === "cpu" &&
+                currentPlayer === "O"
+            ) {
+
+                computerMove();
+
+            }
+        }
+
+
+        /* =========================================================
+           6. ATUALIZA UMA CÉLULA
+           ========================================================= */
+
+        function updateCell(index) {
+
+            const cell = cells[index];
+
+            /*
+             * Mostra X ou O.
+             */
+            cell.textContent = options[index];
+
+
+            /*
+             * Adiciona classe visual.
+             */
+            cell.classList.remove("x", "o");
+
+            if (options[index] === "X") {
+                cell.classList.add("x");
+            }
+
+            if (options[index] === "O") {
+                cell.classList.add("o");
+            }
+
+
+            /*
+             * Desabilita a célula após a jogada.
+             *
+             * CA-02
+             */
+            cell.disabled = true;
+        }
+
+
+        /* =========================================================
+           7. VERIFICA VITÓRIA
+           ========================================================= */
+
+        function checkWinner() {
+
+            /*
+             * Percorre todas as 8 combinações.
+             */
+            for (const pattern of winPatterns) {
+
+                const [a, b, c] = pattern;
+
+                /*
+                 * Verifica se as três posições:
+                 *
+                 * - estão preenchidas;
+                 * - possuem o mesmo símbolo.
+                 */
+                if (
+                    options[a] !== "" &&
+                    options[a] === options[b] &&
+                    options[a] === options[c]
+                ) {
+
+                    /*
+                     * Retorna a combinação vencedora.
+                     */
+                    return pattern;
+                }
+            }
+
+
+            /*
+             * Nenhuma vitória encontrada.
+             */
+            return null;
+        }
+
+
+        /* =========================================================
+           8. VERIFICA EMPATE
+           ========================================================= */
+
+        function checkDraw() {
+
+            /*
+             * Se não existe nenhuma posição vazia,
+             * o tabuleiro está cheio.
+             */
+            return options.every(cell => cell !== "");
+        }
+
+
+        /* =========================================================
+           9. FINALIZA RODADA COM VITÓRIA
+           ========================================================= */
+
+        function finishRoundWithWinner(
+            winner,
+            winningPattern
+        ) {
+
+            /*
+             * Bloqueia o jogo.
+             *
+             * CA-03
+             */
+            running = false;
+            roundFinished = true;
+
+
+            /*
+             * Mostra a linha sobre as três células vencedoras.
+             *
+             * RF-06 / CA-06
+             */
+            drawWinningLine(winningPattern);
+
+
+            /*
+             * Dispara os confetes.
+             *
+             * RF-06
+             */
+            launchConfetti();
+
+
+            /*
+             * Toca o acorde de vitória.
+             *
+             * RF-04
+             */
+            playWinSound();
+
+
+            /*
+             * Atualiza o placar.
+             *
+             * RF-07
+             */
+            if (winner === "X") {
+                winsX++;
+            } else {
+                winsO++;
+            }
+
+            updateScore();
+
+
+            /*
+             * Mostra mensagem.
+             */
+            statusElement.textContent =
+                `Jogador ${winner} venceu a rodada!`;
+
+            statusElement.classList.add("final-message");
+
+
+            /*
+             * Verifica se a partida deve continuar.
+             */
+            handleRoundEnd();
+        }
+
+
+        /* =========================================================
+           10. FINALIZA RODADA COM EMPATE
+           ========================================================= */
+
+        function finishRoundWithDraw() {
+
+            /*
+             * Bloqueia novas jogadas.
+             */
+            running = false;
+            roundFinished = true;
+
+
+            /*
+             * Som de empate.
+             *
+             * E1.2
+             */
+            playDrawSound();
+
+
+            /*
+             * Atualiza mensagem.
+             *
+             * E1.3
+             */
+            statusElement.textContent =
+                "Rodada Empatada!";
+
+
+            statusElement.classList.add("final-message");
+
+
+            /*
+             * Trata a próxima rodada.
+             */
+            handleDrawEnd();
+        }
+
+
+        /* =========================================================
+           11. TRATAMENTO DO FIM DA RODADA APÓS VITÓRIA
+           ========================================================= */
+
+        function handleRoundEnd() {
+
+            /*
+             * PARTIDA ÚNICA
+             *
+             * A partida termina e aguarda
+             * o reinício manual.
+             */
+            if (formatSelectValue === "single") {
+
+                return;
+            }
+
+
+            /*
+             * MELHOR DE 3
+             *
+             * Quem chegar a 2 vitórias
+             * é o campeão.
+             */
+            if (winsX >= 2 || winsO >= 2) {
+
+                const champion =
+                    winsX >= 2 ? "X" : "O";
+
+                const championName =
+                    champion === "X"
+                        ? "Jogador X"
+                        : (
+                            modeSelectValue === "cpu"
+                                ? "Computador"
+                                : "Jogador O"
+                        );
+
+                statusElement.textContent =
+                    `${championName} é o campeão da partida!`;
+
+                return;
+            }
+
+
+            /*
+             * Se ninguém chegou a 2 vitórias,
+             * podemos iniciar outra rodada.
+             */
+            if (currentRound < 3) {
+
+                setTimeout(() => {
+
+                    currentRound++;
+
+                    prepareNextRound();
+
+                }, 2000);
+            }
+        }
+
+
+        /* =========================================================
+           12. TRATAMENTO DO EMPATE NO MD3
+           ========================================================= */
+
+        function handleDrawEnd() {
+
+            /*
+             * Em partida única, o empate encerra o jogo.
+             */
+            if (formatSelectValue === "single") {
+                return;
+            }
+
+
+            /*
+             * No MD3:
+             *
+             * Se ainda não chegamos à terceira rodada,
+             * reiniciamos o tabuleiro mantendo a rodada.
+             *
+             * Isso segue a regra E1.4 do documento.
+             */
+            if (currentRound < 3) {
+
+                setTimeout(() => {
+
+                    prepareNextRound(false);
+
+                }, 2000);
+
+            } else {
+
+                /*
+                 * Se a terceira rodada terminou empatada,
+                 * a partida termina.
+                 */
+                statusElement.textContent =
+                    "Partida encerrada com empate!";
+            }
+        }
+
+
+        /* =========================================================
+           13. PREPARA PRÓXIMA RODADA
+           ========================================================= */
+
+        function prepareNextRound(incrementRound = true) {
+
+            /*
+             * Se solicitado, incrementa o número da rodada.
+             */
+            if (incrementRound) {
+                // A rodada já foi incrementada em handleRoundEnd()
+            }
+
+
+            /*
+             * Limpa o tabuleiro.
+             */
+            options = Array(9).fill("");
+
+
+            /*
+             * X começa todas as rodadas.
+             */
+            currentPlayer = "X";
+
+
+            /*
+             * Libera o tabuleiro.
+             */
+            running = true;
+            roundFinished = false;
+
+
+            /*
+             * Esconde a linha de vitória.
+             */
+            hideWinningLine();
+
+
+            /*
+             * Remove classe da mensagem.
+             */
+            statusElement.classList.remove("final-message");
+
+
+            /*
+             * Limpa visualmente todas as células.
+             */
+            cells.forEach(cell => {
+
+                cell.textContent = "";
+
+                cell.disabled = false;
+
+                cell.classList.remove("x", "o");
+
+            });
+
+
+            /*
+             * Atualiza contador.
+             */
+            updateRoundDisplay();
+
+
+            /*
+             * Atualiza status.
+             */
+            updateStatus();
+        }
+
+
+        /* =========================================================
+           14. JOGADA DO COMPUTADOR
+           ========================================================= */
+
+        function computerMove() {
+
+            /*
+             * Durante o pensamento da CPU,
+             * o tabuleiro fica bloqueado.
+             *
+             * A2.2
+             */
+            running = false;
+
+
+            statusElement.textContent =
+                "Computador pensando...";
+
+
+            /*
+             * Aguarda 400ms.
+             *
+             * A2.3
+             */
+            setTimeout(() => {
+
+                /*
+                 * Procura as posições vazias.
+                 */
+                const emptyPositions = [];
+
+                options.forEach((value, index) => {
+
+                    if (value === "") {
+                        emptyPositions.push(index);
+                    }
+
+                });
+
+
+                /*
+                 * Se não existir nenhuma posição,
+                 * não há movimento possível.
+                 */
+                if (emptyPositions.length === 0) {
+                    return;
+                }
+
+
+                /*
+                 * Escolhe aleatoriamente uma posição.
+                 *
+                 * A2.4
+                 */
+                const randomIndex =
+                    Math.floor(
+                        Math.random() *
+                        emptyPositions.length
+                    );
+
+                const chosenPosition =
+                    emptyPositions[randomIndex];
+
+
+                /*
+                 * Executa a jogada do O.
+                 *
+                 * A2.5
+                 */
+                options[chosenPosition] = "O";
+
+                updateCell(chosenPosition);
+
+                playMoveSound("O");
+
+
+                /*
+                 * Verifica se a CPU venceu.
+                 */
+                const winningPattern = checkWinner();
+
+                if (winningPattern) {
+
+                    finishRoundWithWinner(
+                        "O",
+                        winningPattern
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Verifica empate.
+                 */
+                if (checkDraw()) {
+
+                    finishRoundWithDraw();
+
+                    return;
+                }
+
+
+                /*
+                 * Volta para o jogador X.
+                 */
+                currentPlayer = "X";
+
+                running = true;
+
+                updateStatus();
+
+            }, 400);
+        }
+
+
+        /* =========================================================
+           15. ATUALIZA STATUS
+           ========================================================= */
+
+        function updateStatus() {
+
+            /*
+             * Quando o jogo está ativo,
+             * mostra de quem é a vez.
+             */
+            if (running) {
+
+                statusElement.textContent =
+                    `Vez do Jogador ${currentPlayer}`;
+
+            }
+        }
+
+
+        /* =========================================================
+           16. ATUALIZA PLACAR
+           ========================================================= */
+
+        function updateScore() {
+
+            scoreXElement.textContent = winsX;
+            scoreOElement.textContent = winsO;
+        }
+
+
+        /* =========================================================
+           17. ATUALIZA CONTADOR DE RODADA
+           ========================================================= */
+
+        function updateRoundDisplay() {
+
+            /*
+             * Partida única:
+             * sempre mostra 1/1.
+             */
+            if (formatSelectValue === "single") {
+
+                roundDisplay.textContent = "1/1";
+
+                return;
+            }
+
+
+            /*
+             * MD3:
+             * mostra 1/3, 2/3 ou 3/3.
+             */
+            roundDisplay.textContent =
+                `${currentRound}/3`;
+        }
+
+
+        /* =========================================================
+           18. ALTERAÇÃO DE MODO DE JOGO
+           ========================================================= */
+
+        modeSelect.addEventListener("change", () => {
+
+            modeSelectValue = modeSelect.value;
+
+
+            /*
+             * RF-01 / A3
+             *
+             * Alterar configuração reinicia
+             * completamente a partida.
+             */
+            resetGame();
+
+
+            /*
+             * Atualiza o nome do jogador O.
+             */
+            if (modeSelectValue === "cpu") {
+
+                playerOLabel.textContent =
+                    "COMPUTADOR";
+
+            } else {
+
+                playerOLabel.textContent =
+                    "JOGADOR O";
+            }
+
+        });
+
+
+        /* =========================================================
+           19. ALTERAÇÃO DO FORMATO
+           ========================================================= */
+
+        formatSelect.addEventListener("change", () => {
+
+            formatSelectValue = formatSelect.value;
+
+
+            /*
+             * RF-02 / A3
+             *
+             * Alterar o formato reinicia
+             * placar e rodada.
+             */
+            resetGame();
+
+        });
+
+
+        /* =========================================================
+           20. BOTÃO REINICIAR
+           ========================================================= */
+
+        restartButton.addEventListener("click", () => {
+
+            /*
+             * RF-08 / A3
+             */
+            resetGame();
+
+        });
+
+
+        /* =========================================================
+           21. REINICIAR JOGO
+           ========================================================= */
+
+        function resetGame() {
+
+            /*
+             * Limpa tabuleiro.
+             */
+            options = Array(9).fill("");
+
+
+            /*
+             * X sempre começa.
+             */
+            currentPlayer = "X";
+
+
+            /*
+             * Zera placar.
+             */
+            winsX = 0;
+            winsO = 0;
+
+
+            /*
+             * Volta para primeira rodada.
+             */
+            currentRound = 1;
+
+
+            /*
+             * Libera o jogo.
+             */
+            running = true;
+            roundFinished = false;
+
+
+            /*
+             * Esconde linha.
+             */
+            hideWinningLine();
+
+
+            /*
+             * Remove estado final.
+             */
+            statusElement.classList.remove("final-message");
+
+
+            /*
+             * Limpa células.
+             */
+            cells.forEach(cell => {
+
+                cell.textContent = "";
+
+                cell.disabled = false;
+
+                cell.classList.remove("x", "o");
+
+            });
+
+
+            /*
+             * Atualiza interface.
+             */
+            updateScore();
+
+            updateRoundDisplay();
+
+            updateStatus();
+
+
+            /*
+             * Se o modo CPU estivesse configurado,
+             * X começa, então não precisamos chamar
+             * a CPU neste momento.
+             */
+        }
+
+
+        /* =========================================================
+           22. DESENHA LINHA DE VITÓRIA
+           ========================================================= */
+
+        function drawWinningLine(pattern) {
+
+            /*
+             * Pega as três células vencedoras.
+             */
+            const firstCell = cells[pattern[0]];
+            const lastCell = cells[pattern[2]];
+
+
+            /*
+             * Obtém a posição de cada célula.
+             */
+            const firstRect =
+                firstCell.getBoundingClientRect();
+
+            const lastRect =
+                lastCell.getBoundingClientRect();
+
+            const containerRect =
+                boardContainer.getBoundingClientRect();
+
+
+            /*
+             * Calcula o centro da primeira célula.
+             */
+            const startX =
+                firstRect.left +
+                firstRect.width / 2 -
+                containerRect.left;
+
+            const startY =
+                firstRect.top +
+                firstRect.height / 2 -
+                containerRect.top;
+
+
+            /*
+             * Calcula o centro da última célula.
+             */
+            const endX =
+                lastRect.left +
+                lastRect.width / 2 -
+                containerRect.left;
+
+            const endY =
+                lastRect.top +
+                lastRect.height / 2 -
+                containerRect.top;
+
+
+            /*
+             * Calcula distância entre os pontos.
+             */
+            const deltaX = endX - startX;
+            const deltaY = endY - startY;
+
+            const distance =
+                Math.sqrt(
+                    deltaX * deltaX +
+                    deltaY * deltaY
+                );
+
+
+            /*
+             * Calcula o ângulo da linha.
+             */
+            const angle =
+                Math.atan2(deltaY, deltaX) *
+                (180 / Math.PI);
+
+
+            /*
+             * Posiciona a linha.
+             */
+            winLine.style.left = `${startX}px`;
+            winLine.style.top = `${startY}px`;
+
+            winLine.style.width = `${distance}px`;
+
+            winLine.style.transform =
+                `rotate(${angle}deg)`;
+
+
+            /*
+             * Torna a linha visível.
+             */
+            winLine.classList.add("visible");
+        }
+
+
+        /* =========================================================
+           23. ESCONDE LINHA DE VITÓRIA
+           ========================================================= */
+
+        function hideWinningLine() {
+
+            winLine.classList.remove("visible");
+
+            winLine.style.width = "0";
+        }
+
+
+        /* =========================================================
+           24. WEB AUDIO API
+           =========================================================
+
+           Os sons são gerados pelo próprio navegador.
+
+           Não usamos:
+           - MP3
+           - WAV
+           - arquivos externos
+
+           Isso atende RF-04 e CA-07.
+        */
+
+        let audioContext = null;
+
+
+        /*
+         * Cria ou recupera o contexto de áudio.
+         */
+        function getAudioContext() {
+
+            if (!audioContext) {
+
+                const AudioContext =
+                    window.AudioContext ||
+                    window.webkitAudioContext;
+
+                if (!AudioContext) {
+                    return null;
+                }
+
+                audioContext = new AudioContext();
+            }
+
+
+            /*
+             * Alguns navegadores suspendem o áudio
+             * até que exista interação do usuário.
+             */
+            if (audioContext.state === "suspended") {
+                audioContext.resume();
+            }
+
+
+            return audioContext;
+        }
+
+
+        /* =========================================================
+           25. SOM DE JOGADA
+           ========================================================= */
+
+        function playMoveSound(player) {
+
+            const ctx = getAudioContext();
+
+            if (!ctx) {
+                return;
+            }
+
+
+            /*
+             * Frequências diferentes para X e O.
+             */
+            const frequency =
+                player === "X"
+                    ? 440
+                    : 330;
+
+
+            const oscillator =
+                ctx.createOscillator();
+
+            const gain =
+                ctx.createGain();
+
+
+            oscillator.type = "sine";
+
+            oscillator.frequency.value =
+                frequency;
+
+
+            /*
+             * Volume começa baixo e desaparece
+             * rapidamente.
+             */
+            gain.gain.setValueAtTime(
+                0.0001,
+                ctx.currentTime
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.12,
+                ctx.currentTime + 0.01
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.0001,
+                ctx.currentTime + 0.12
+            );
+
+
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+
+
+            oscillator.start();
+
+            oscillator.stop(
+                ctx.currentTime + 0.13
+            );
+        }
+
+
+        /* =========================================================
+           26. SOM DE VITÓRIA
+           ========================================================= */
+
+        function playWinSound() {
+
+            const ctx = getAudioContext();
+
+            if (!ctx) {
+                return;
+            }
+
+
+            /*
+             * Acorde simples de vitória.
+             */
+            const frequencies = [
+                523.25,
+                659.25,
+                783.99
+            ];
+
+
+            frequencies.forEach(
+                (frequency, index) => {
+
+                    const oscillator =
+                        ctx.createOscillator();
+
+                    const gain =
+                        ctx.createGain();
+
+
+                    oscillator.type = "sine";
+
+                    oscillator.frequency.value =
+                        frequency;
+
+
+                    const startTime =
+                        ctx.currentTime +
+                        index * 0.08;
+
+
+                    gain.gain.setValueAtTime(
+                        0.0001,
+                        startTime
+                    );
+
+                    gain.gain.exponentialRampToValueAtTime(
+                        0.15,
+                        startTime + 0.02
+                    );
+
+                    gain.gain.exponentialRampToValueAtTime(
+                        0.0001,
+                        startTime + 0.45
+                    );
+
+
+                    oscillator.connect(gain);
+                    gain.connect(ctx.destination);
+
+
+                    oscillator.start(startTime);
+
+                    oscillator.stop(
+                        startTime + 0.46
+                    );
+                }
+            );
+        }
+
+
+        /* =========================================================
+           27. SOM DE EMPATE
+           ========================================================= */
+
+        function playDrawSound() {
+
+            const ctx = getAudioContext();
+
+            if (!ctx) {
+                return;
+            }
+
+
+            /*
+             * Frequências descendentes para representar empate.
+             */
+            const frequencies = [
+                440,
+                349.23,
+                293.66
+            ];
+
+
+            frequencies.forEach(
+                (frequency, index) => {
+
+                    const oscillator =
+                        ctx.createOscillator();
+
+                    const gain =
+                        ctx.createGain();
+
+
+                    oscillator.type = "triangle";
+
+                    oscillator.frequency.value =
+                        frequency;
+
+
+                    const startTime =
+                        ctx.currentTime +
+                        index * 0.15;
+
+
+                    gain.gain.setValueAtTime(
+                        0.0001,
+                        startTime
+                    );
+
+                    gain.gain.exponentialRampToValueAtTime(
+                        0.12,
+                        startTime + 0.02
+                    );
+
+                    gain.gain.exponentialRampToValueAtTime(
+                        0.0001,
+                        startTime + 0.18
+                    );
+
+
+                    oscillator.connect(gain);
+                    gain.connect(ctx.destination);
+
+
+                    oscillator.start(startTime);
+
+                    oscillator.stop(
+                        startTime + 0.2
+                    );
+                }
+            );
+        }
+
+
+        /* =========================================================
+           28. SISTEMA DE CONFETES
+           =========================================================
+
+           Utilizamos Canvas e JavaScript puro.
+
+           Não existe dependência externa.
+        */
+
+        const confettiCanvas =
+            document.getElementById(
+                "confettiCanvas"
+            );
+
+        const confettiContext =
+            confettiCanvas.getContext("2d");
+
+
+        let confettiParticles = [];
+
+
+        /*
+         * Ajusta o tamanho do canvas.
+         */
+        function resizeConfettiCanvas() {
+
+            confettiCanvas.width =
+                window.innerWidth;
+
+            confettiCanvas.height =
+                window.innerHeight;
+        }
+
+
+        window.addEventListener(
+            "resize",
+            resizeConfettiCanvas
+        );
+
+
+        resizeConfettiCanvas();
+
+
+        /* =========================================================
+           29. CRIA CONFETES
+           ========================================================= */
+
+        function launchConfetti() {
+
+            confettiParticles = [];
+
+
+            /*
+             * Cria várias partículas.
+             */
+            for (let i = 0; i < 160; i++) {
+
+                confettiParticles.push({
+
+                    x:
+                        Math.random() *
+                        confettiCanvas.width,
+
+                    y:
+                        -20 -
+                        Math.random() *
+                        200,
+
+                    size:
+                        5 +
+                        Math.random() * 7,
+
+                    speed:
+                        2 +
+                        Math.random() * 4,
+
+                    rotation:
+                        Math.random() *
+                        Math.PI * 2,
+
+                    rotationSpeed:
+                        -0.15 +
+                        Math.random() * 0.3,
+
+                    color:
+                        getRandomConfettiColor(),
+
+                    opacity: 1
+
+                });
+            }
+
+
+            /*
+             * Inicia animação.
+             */
+            animateConfetti();
+        }
+
+
+        /* =========================================================
+           30. CORES DOS CONFETES
+           ========================================================= */
+
+        function getRandomConfettiColor() {
+
+            const colors = [
+
+                "#003366",
+                "#0056b3",
+                "#d97706",
+                "#16a34a",
+                "#dc2626",
+                "#facc15"
+
+            ];
+
+            return colors[
+                Math.floor(
+                    Math.random() *
+                    colors.length
+                )
+            ];
+        }
+
+
+        /* =========================================================
+           31. ANIMAÇÃO DOS CONFETES
+           ========================================================= */
+
+        function animateConfetti() {
+
+            /*
+             * Limpa o canvas.
+             */
+            confettiContext.clearRect(
+                0,
+                0,
+                confettiCanvas.width,
+                confettiCanvas.height
+            );
+
+
+            /*
+             * Atualiza e desenha cada partícula.
+             */
+            confettiParticles.forEach(
+                particle => {
+
+                    particle.y +=
+                        particle.speed;
+
+                    particle.rotation +=
+                        particle.rotationSpeed;
+
+                    /*
+                     * Gravidade.
+                     */
+                    particle.speed += 0.025;
+
+
+                    confettiContext.save();
+
+                    confettiContext.translate(
+                        particle.x,
+                        particle.y
+                    );
+
+                    confettiContext.rotate(
+                        particle.rotation
+                    );
+
+
+                    confettiContext.globalAlpha =
+                        particle.opacity;
+
+                    confettiContext.fillStyle =
+                        particle.color;
+
+
+                    confettiContext.fillRect(
+                        -particle.size / 2,
+                        -particle.size / 2,
+                        particle.size,
+                        particle.size
+                    );
+
+
+                    confettiContext.restore();
+
+                }
+            );
+
+
+            /*
+             * Remove partículas que saíram da tela.
+             */
+            confettiParticles =
+                confettiParticles.filter(
+                    particle =>
+                        particle.y <
+                        confettiCanvas.height + 30
+                );
+
+
+            /*
+             * Continua enquanto existirem partículas.
+             */
+            if (confettiParticles.length > 0) {
+
+                requestAnimationFrame(
+                    animateConfetti
+                );
+
+            } else {
+
+                confettiContext.clearRect(
+                    0,
+                    0,
+                    confettiCanvas.width,
+                    confettiCanvas.height
+                );
+            }
+        }
+
+
+        /* =========================================================
+           32. INICIALIZAÇÃO
+           ========================================================= */
+
+        /*
+         * Garante que a interface comece
+         * exatamente no estado especificado.
+         */
+        updateScore();
+
+        updateRoundDisplay();
+
+        updateStatus();
+
+    </script>
+
+</body>
+</html>
