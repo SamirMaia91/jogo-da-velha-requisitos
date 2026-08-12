@@ -258,6 +258,12 @@
             transform: scale(0.97);
         }
 
+        .cell:focus-visible,
+        .restart:focus-visible {
+            outline: 3px solid rgba(0, 86, 179, 0.45);
+            outline-offset: 3px;
+        }
+
         .cell:disabled {
             cursor: default;
         }
@@ -385,7 +391,7 @@
 
 <body>
 
-    <canvas id="confettiCanvas"></canvas>
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
 
     <main class="container">
 
@@ -495,7 +501,7 @@
 
         <!-- STATUS -->
 
-        <div class="status" id="status">
+        <div class="status" id="status" role="status" aria-live="polite">
             Vez do Jogador X
         </div>
 
@@ -506,28 +512,28 @@
 
             <div class="board" id="board">
 
-                <button class="cell" data-index="0"></button>
-                <button class="cell" data-index="1"></button>
-                <button class="cell" data-index="2"></button>
+                <button class="cell" type="button" data-index="0" aria-label="Célula 1"></button>
+                <button class="cell" type="button" data-index="1" aria-label="Célula 2"></button>
+                <button class="cell" type="button" data-index="2" aria-label="Célula 3"></button>
 
-                <button class="cell" data-index="3"></button>
-                <button class="cell" data-index="4"></button>
-                <button class="cell" data-index="5"></button>
+                <button class="cell" type="button" data-index="3" aria-label="Célula 4"></button>
+                <button class="cell" type="button" data-index="4" aria-label="Célula 5"></button>
+                <button class="cell" type="button" data-index="5" aria-label="Célula 6"></button>
 
-                <button class="cell" data-index="6"></button>
-                <button class="cell" data-index="7"></button>
-                <button class="cell" data-index="8"></button>
+                <button class="cell" type="button" data-index="6" aria-label="Célula 7"></button>
+                <button class="cell" type="button" data-index="7" aria-label="Célula 8"></button>
+                <button class="cell" type="button" data-index="8" aria-label="Célula 9"></button>
 
             </div>
 
-            <div class="win-line" id="winLine"></div>
+            <div class="win-line" id="winLine" aria-hidden="true"></div>
 
         </div>
 
 
         <!-- REINICIAR -->
 
-        <button class="restart" id="restartButton">
+        <button class="restart" id="restartButton" type="button">
             REINICIAR JOGO
         </button>
 
@@ -880,8 +886,15 @@
             updateScore();
 
 
+            const winnerName =
+                winner === "O" &&
+                modeSelectValue === "cpu"
+                    ? "Computador"
+                    : `Jogador ${winner}`;
+
+
             statusElement.textContent =
-                `Jogador ${winner} venceu a rodada!`;
+                `${winnerName} venceu a rodada!`;
 
             statusElement.classList.add(
                 "final-message"
@@ -1059,7 +1072,7 @@
                      * a rodada.
                      */
 
-                    prepareNextRound(false);
+                    prepareNextRound();
 
                 }, 2000);
 
@@ -1078,6 +1091,8 @@
         ========================================================= */
 
         function prepareNextRound() {
+
+            stopConfetti();
 
             options =
                 Array(9).fill("");
@@ -1505,6 +1520,9 @@
             roundFinished = false;
 
 
+            stopConfetti();
+
+
             /*
              * Esconde linha.
              */
@@ -1911,8 +1929,16 @@
                 "triangle";
 
 
-            oscillator.frequency.value =
-                220;
+            oscillator.frequency.setValueAtTime(
+                330,
+                ctx.currentTime
+            );
+
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                165,
+                ctx.currentTime + 0.4
+            );
 
 
             gain.gain.setValueAtTime(
@@ -2050,6 +2076,32 @@
 
 
             animateConfetti();
+
+        }
+
+
+        function stopConfetti() {
+
+            if (confettiAnimation) {
+
+                cancelAnimationFrame(
+                    confettiAnimation
+                );
+
+                confettiAnimation = null;
+
+            }
+
+
+            confettiParticles = [];
+
+
+            confettiContext.clearRect(
+                0,
+                0,
+                confettiCanvas.width,
+                confettiCanvas.height
+            );
 
         }
 
