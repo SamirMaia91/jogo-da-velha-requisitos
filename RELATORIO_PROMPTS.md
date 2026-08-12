@@ -12,9 +12,9 @@ A definição do escopo e dos requisitos teve como base a especificação fornec
 
 ---
 
-## 2. Ferramenta utilizada
+## 2. Ferramentas utilizadas
 
-A ferramenta de Inteligência Artificial utilizada foi o **ChatGPT**, da OpenAI.
+As ferramentas de Inteligência Artificial utilizadas foram o **ChatGPT** e o **Codex**, da OpenAI.
 
 A interação foi realizada por meio de conversas em linguagem natural, nas quais foram apresentados os requisitos do projeto e solicitadas orientações para o desenvolvimento da aplicação.
 
@@ -222,6 +222,33 @@ Foi elaborado um README contendo:
 
 ---
 
+### Prompt 08 — Auditoria de conformidade e preparação da versão 1.1
+
+**Solicitação:**
+
+Foi solicitada uma análise minuciosa do repositório em comparação com a totalidade do CDU, seguida da correção dos pontos necessários e da preparação da entrega no GitHub.
+
+**Objetivo:**
+
+Garantir consistência entre especificação, implementação, critérios de aceite e documentação, com foco na avaliação acadêmica.
+
+**Resultado:**
+
+Foram realizados:
+
+* correção da extensão do arquivo do CDU;
+* revisão da regra de empate e transição de rodadas no MD3;
+* fortalecimento do controle de temporizadores da CPU e das rodadas;
+* cancelamento seguro dos confetes em reinícios e transições;
+* melhoria de acessibilidade da interface;
+* revisão do efeito sonoro descendente de empate;
+* atualização da matriz de dados e dos critérios de aceite;
+* criação de evidências e roteiros reproduzíveis de testes;
+* reformulação do README com histórico de versões;
+* configuração de publicação pelo GitHub Pages.
+
+---
+
 ## 5. Utilização da IA no desenvolvimento
 
 A Inteligência Artificial foi utilizada como ferramenta de apoio durante diferentes etapas do projeto.
@@ -236,7 +263,8 @@ As principais contribuições foram:
 6. auxílio na documentação;
 7. organização do repositório;
 8. elaboração do README;
-9. elaboração deste relatório de interação.
+9. elaboração deste relatório de interação;
+10. auditoria de conformidade entre CDU, código e critérios de aceite.
 
 A IA foi utilizada como apoio ao desenvolvimento e não como substituta da validação do sistema.
 
@@ -293,7 +321,7 @@ Foram considerados testes relacionados às seguintes funcionalidades:
 * efeitos visuais;
 * efeitos sonoros.
 
-Os testes realizados indicaram que as funcionalidades principais estavam funcionando conforme os requisitos definidos.
+Os testes realizados indicaram que as funcionalidades principais estavam funcionando conforme os requisitos definidos. A versão 1.1 também passou a contar com uma matriz de evidências e um roteiro reproduzível em `docs/EVIDENCIAS_TESTES.md`.
 
 ---
 
