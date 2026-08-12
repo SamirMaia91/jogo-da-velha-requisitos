@@ -245,7 +245,39 @@ Foram realizados:
 * atualização da matriz de dados e dos critérios de aceite;
 * criação de evidências e roteiros reproduzíveis de testes;
 * reformulação do README com histórico de versões;
-* configuração de publicação pelo GitHub Pages.
+* configuração inicial de publicação pelo GitHub Pages, posteriormente removida por decisão do responsável.
+
+---
+
+### Prompt 09 — Evolução funcional e preparação da versão 1.2
+
+**Solicitação:**
+
+Foi solicitada a inclusão de um cronômetro regressivo de 10 segundos por jogada e de outros aprimoramentos, sem perder a conformidade com o CDU. Também foi solicitada a atualização completa do README e a publicação em um único commit na branch principal.
+
+**Objetivo:**
+
+Evoluir o projeto sem remover os requisitos originais, mantendo o modo clássico como configuração padrão e registrando formalmente as novas regras.
+
+**Resultado:**
+
+Foram implementados:
+
+* cronômetro opcional de 10 segundos, desativado por padrão;
+* perda de turno quando o tempo termina;
+* aplicação do cronômetro somente ao jogador humano no modo CPU;
+* níveis Fácil, Médio e Difícil para a CPU;
+* estratégia tática no nível Médio;
+* algoritmo Minimax no nível Difícil;
+* controle para ativar ou desativar sons;
+* preferência de movimento reduzido;
+* interface visual renovada e responsiva;
+* correção da repetição da rodada em empate no indicador 3/3;
+* atualização do CDU para a versão 1.2;
+* atualização do README, evidências e matriz de rastreabilidade;
+* suíte permanente com 40 verificações automatizadas;
+* workflow de qualidade com GitHub Actions;
+* remoção da publicação pelo GitHub Pages conforme decisão do responsável.
 
 ---
 
@@ -264,7 +296,8 @@ As principais contribuições foram:
 7. organização do repositório;
 8. elaboração do README;
 9. elaboração deste relatório de interação;
-10. auditoria de conformidade entre CDU, código e critérios de aceite.
+10. auditoria de conformidade entre CDU, código e critérios de aceite;
+11. criação de testes automatizados e evolução controlada para a versão 1.2.
 
 A IA foi utilizada como apoio ao desenvolvimento e não como substituta da validação do sistema.
 
@@ -286,6 +319,9 @@ A implementação foi realizada considerando os requisitos apresentados na espec
 | RF-06     | Linha de vitória e animação de confetes         |
 | RF-07     | Placar e controle das rodadas                   |
 | RF-08     | Reinício geral da partida                       |
+| RF-09     | Cronômetro opcional e perda de turno             |
+| RF-10     | Níveis Fácil, Médio e Difícil da CPU             |
+| RF-11     | Preferências de som e movimento reduzido         |
 
 ---
 
@@ -297,7 +333,9 @@ O projeto foi desenvolvido utilizando:
 * **CSS3** para a interface visual;
 * **JavaScript** para a lógica do jogo;
 * **Web Audio API** para os efeitos sonoros;
-* **Canvas API** para a animação dos confetes.
+* **Canvas API** para a animação dos confetes;
+* **Node.js Test Runner** para a regressão automatizada;
+* **GitHub Actions** para a verificação contínua de qualidade.
 
 O sistema foi desenvolvido sem necessidade de back-end e com o código completo da aplicação concentrado no arquivo `src/index.html`.
 
@@ -319,9 +357,14 @@ Foram considerados testes relacionados às seguintes funcionalidades:
 * atualização do placar;
 * reinício da partida;
 * efeitos visuais;
-* efeitos sonoros.
+* efeitos sonoros;
+* cronômetro e perda de turno;
+* níveis de dificuldade da CPU;
+* empate na terceira rodada do MD3;
+* controles de som e movimento reduzido;
+* acessibilidade por teclado e atributos semânticos.
 
-Os testes realizados indicaram que as funcionalidades principais estavam funcionando conforme os requisitos definidos. A versão 1.1 também passou a contar com uma matriz de evidências e um roteiro reproduzível em `docs/EVIDENCIAS_TESTES.md`.
+Os testes realizados indicaram que as funcionalidades principais estavam funcionando conforme os requisitos definidos. A versão 1.2 passou a contar com uma matriz de evidências, um roteiro manual reproduzível em `docs/EVIDENCIAS_TESTES.md` e 40 verificações automáticas em `tests/game.test.mjs`.
 
 ---
 

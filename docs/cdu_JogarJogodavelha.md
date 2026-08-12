@@ -8,6 +8,7 @@
 | ---------- | ------- | ----------------------------------------------- | ------------ |
 | 08/08/2026 | 1.0     | Criação do caso de uso de Jogar Jogo da Velha | Equipe LAPIS |
 | 12/08/2026 | 1.1     | Revisão de consistência, rastreabilidade e critérios de aceite | Mário_DEV |
+| 12/08/2026 | 1.2     | Cronômetro opcional, níveis da CPU, acessibilidade e testes automáticos | Mário_DEV |
 
 ---
 
@@ -17,7 +18,7 @@
 
 ## 2. Objetivo
 
-Permitir que o usuário dispute partidas do Jogo da Velha em ambiente web, oferecendo modos contra outro jogador local ou contra o computador, formatos de partida única ou Melhor de 3 (MD3), acompanhamento do placar, efeitos visuais da linha vitoriosa, efeitos sonoros e confetes na vitória.
+Permitir que o usuário dispute partidas do Jogo da Velha em ambiente web, oferecendo modos contra outro jogador local ou contra o computador, formatos de partida única ou Melhor de 3 (MD3), acompanhamento do placar, efeitos visuais da linha vitoriosa, efeitos sonoros e confetes na vitória. Opcionalmente, o usuário pode habilitar um cronômetro de 10 segundos, escolher o nível da CPU e ajustar som e movimento sem alterar o comportamento clássico padrão.
 
 ## 3. Tipo de Caso de Uso
 
@@ -40,15 +41,15 @@ O Jogador deve acessar a aplicação web por meio de um navegador compatível co
 ## 6. Fluxo Principal
 
 * **P1.** O Jogador acessa a aplicação.
-* **P2.** O sistema exibe a interface principal contendo a identificação da universidade ("UNIVERSIDADE DE FORTALEZA"), o título, os seletores de "Modo de Jogo" (2 Jogadores / Contra o Computador) e "Formato da Partida" (Partida Única / Melhor de 3), o placar zerado, o indicador de rodada, a mensagem de status da vez ("Vez do Jogador X"), o tabuleiro 3x3 com células vazias e o botão "Reiniciar Jogo".
+* **P2.** O sistema exibe a interface principal contendo a identificação da universidade ("UNIVERSIDADE DE FORTALEZA"), o título, os seletores de "Modo de Jogo" (2 Jogadores / Contra o Computador), "Formato da Partida" (Partida Única / Melhor de 3) e "Cronômetro por Jogada" (Desativado / 10 segundos), o seletor de dificuldade quando o modo CPU estiver ativo, as preferências de som e movimento, o placar zerado, o indicador de rodada, a mensagem de status da vez ("Vez do Jogador X"), o tabuleiro 3x3 com células vazias e o botão "Reiniciar Jogo".
 * **P3.** O Jogador seleciona uma célula vazia do tabuleiro.
 * **P4.** O sistema registra a jogada do jogador atual.
   * **P4.1.** Preenche a célula selecionada com o símbolo do jogador atual ('X' ou 'O').
-  * **P4.2.** Toca o efeito sonoro sintetizado correspondente ao símbolo.
+  * **P4.2.** Toca o efeito sonoro sintetizado correspondente ao símbolo quando a preferência de sons estiver ativada, sendo este o estado padrão.
   * **P4.3.** Avalia o tabuleiro em busca de combinações vitoriosas nas linhas, colunas ou diagonais. **[E1]** **[A1]**
 * **P5.** O sistema alterna o turno para o próximo jogador.
 * **P6.** O sistema atualiza a mensagem de status exibindo a vez do próximo jogador.
-* **P7.** O Jogador realiza a jogada seguinte. **[A2]**
+* **P7.** O Jogador realiza a jogada seguinte. **[A2]** **[A4]**
 
 ---
 
@@ -58,8 +59,8 @@ O Jogador deve acessar a aplicação web por meio de um navegador compatível co
 
 * **A1.1.** No passo **P4.3**, o sistema identifica três símbolos iguais alinhados em uma linha, coluna ou diagonal.
 * **A1.2.** O sistema traça uma linha visual contínua sobre a sequência de três células vitoriosas.
-* **A1.3.** O sistema dispara a animação de confetes.
-* **A1.4.** O sistema toca o acorde sonoro sintetizado de vitória.
+* **A1.3.** O sistema dispara a animação de confetes quando a preferência de movimento reduzido estiver desativada, sendo este o estado padrão.
+* **A1.4.** O sistema toca o acorde sonoro sintetizado de vitória quando a preferência de sons estiver ativada.
 * **A1.5.** O sistema incrementa a pontuação do jogador vencedor no placar.
 * **A1.6.** O sistema atualiza a mensagem de status declarando o vencedor da rodada.
 * **A1.7.** Caso o formato selecionado seja **Melhor de 3 (MD3)**:
@@ -72,16 +73,29 @@ O Jogador deve acessar a aplicação web por meio de um navegador compatível co
 * **A2.1.** No passo **P7**, estando configurado o modo "Contra o Computador" e sendo a vez do jogador 'O':
 * **A2.2.** O sistema bloqueia temporariamente novos cliques do Jogador.
 * **A2.3.** O sistema aguarda um intervalo de reflexão (400ms).
-* **A2.4.** O sistema escolhe uma posição vazia no tabuleiro.
+* **A2.4.** O sistema escolhe uma posição vazia conforme a dificuldade selecionada:
+  * **A2.4.1. Fácil:** escolhe aleatoriamente uma célula vazia.
+  * **A2.4.2. Médio:** prioriza uma vitória imediata, bloqueia uma vitória imediata de X, ocupa o centro quando possível e usa escolha aleatória como alternativa.
+  * **A2.4.3. Difícil:** utiliza o algoritmo Minimax para selecionar a jogada de melhor resultado.
 * **A2.5.** O sistema executa o movimento do Computador na célula escolhida e segue para o passo **P4.1**.
 
 ### A3. Reinício da Partida / Alteração de Parâmetros
 
-* **A3.1.** Em qualquer passo do jogo, o Jogador clica no botão "Reiniciar Jogo" ou altera qualquer um dos seletores ("Modo de Jogo" ou "Formato da Partida").
+* **A3.1.** Em qualquer passo do jogo, o Jogador clica no botão "Reiniciar Jogo" ou altera um seletor que afeta a partida ("Modo de Jogo", "Formato da Partida", "Cronômetro por Jogada" ou "Dificuldade da CPU").
 * **A3.2.** O sistema zera o placar de ambos os jogadores e o contador de rodadas.
 * **A3.3.** O sistema oculta a linha vitoriosa e limpa todas as células do tabuleiro.
 * **A3.4.** O sistema define o Jogador X como o primeiro a jogar.
 * **A3.5.** O sistema retorna ao passo **P2**.
+
+### A4. Tempo Esgotado no Modo Cronometrado
+
+* **A4.1.** No passo **P7**, se o cronômetro de 10 segundos estiver habilitado, o sistema inicia a contagem regressiva para o jogador humano atual.
+* **A4.2.** A cada segundo, o sistema atualiza o valor numérico e a barra visual.
+* **A4.3.** Nos últimos 3 segundos, o sistema destaca o cronômetro e toca alertas quando os sons estiverem ativados.
+* **A4.4.** Se o tempo chegar a zero antes de uma jogada válida, o sistema informa que o tempo do jogador terminou e alterna o turno sem preencher uma célula.
+* **A4.5.** No modo PVP, o sistema reinicia o cronômetro para o outro jogador e retorna ao passo **P7**.
+* **A4.6.** No modo CPU, o cronômetro se aplica apenas ao Jogador X; após seu tempo terminar, o sistema segue para **A2**.
+* **A4.7.** Uma jogada válida, o término da rodada, um reinício ou uma alteração de parâmetro cancela a contagem pendente.
 
 ---
 
@@ -90,7 +104,7 @@ O Jogador deve acessar a aplicação web por meio de um navegador compatível co
 ### E1. Fim de Rodada por Empate
 
 * **E1.1.** No passo **P4.3**, o sistema identifica que todas as 9 células foram preenchidas e nenhuma combinação vitoriosa foi alcançada.
-* **E1.2.** O sistema toca o som descendente sintetizado de empate.
+* **E1.2.** O sistema toca o som descendente sintetizado de empate quando a preferência de sons estiver ativada.
 * **E1.3.** O sistema atualiza a mensagem de status exibindo "Rodada Empatada!".
 * **E1.4.** Se o formato for **Melhor de 3 (MD3)**, o sistema aguarda 2 segundos, limpa o tabuleiro e repete a rodada atual sem incrementar seu número. O empate não conta como uma das três rodadas decisivas da série.
 
@@ -105,6 +119,8 @@ Ao término de cada rodada ou partida, a pontuação acumulada é mantida no pla
 * **Interface Institucional:** Aplicação de paleta de cores e tipografia correspondentes à identidade visual da UNIFOR (Azul `#003366`, Azul Destaque `#0056b3`, Laranja `#d97706` e Fundo `#f4f6f9`).
 * **Sintetização de Áudio (Zero Dependência de Arquivos):** Efeitos sonoros gerados exclusivamente via Web Audio API nativa do navegador.
 * **Portabilidade:** Execução completa contida em um único arquivo HTML/CSS/JS, sem necessidade de servidor back-end.
+* **Acessibilidade:** Interface operável por teclado, células com rótulos dinâmicos, status anunciado por tecnologias assistivas, foco visível e opção de movimento reduzido.
+* **Compatibilidade Clássica:** Cronômetro desativado, CPU Fácil, sons ativados e animações completas como valores iniciais, preservando o fluxo original.
 
 ## 11. Ponto de Extensão
 
@@ -133,6 +149,11 @@ Uso recreativo e educacional frequente, com picos durante demonstrações ou aul
 | **UI-09** | Células do Tabuleiro      | Botões Grid ($3 \times 3$) | Matriz de 9 botões com valores`''`, `'X'` ou `'O'` | Todas vazias (`''`)    | Ao clicar, insere o símbolo do jogador atual e desabilita a célula clicada. |
 | **UI-10** | Linha de Vitória          | Div (`overlay`)             | Linha colorida esticada e rotacionada sobre o grid        | Oculta (`opacity: 0`)  | Calculada via CSS/JS para cobrir o centro das 3 células vitoriosas.          |
 | **UI-11** | Botão Reiniciar           | Botão (`<button>`)         | Texto em caixa alta (`REINICIAR JOGO`)                  | Habilitado               | Zera placar, rodadas, limpa o tabuleiro e reseta para o turno do Jogador X.   |
+| **UI-12** | Seletor de Cronômetro | Dropdown (`<select>`) | `Desativado (Clássico)` / `10 segundos` | `Desativado (Clássico)` | Ao ser alterado, reinicia a partida e controla a contagem por turno humano. |
+| **UI-13** | Seletor de Dificuldade | Dropdown (`<select>`) | `Fácil` / `Médio` / `Difícil` | `Fácil` | Exibido somente no modo CPU; ao ser alterado, reinicia a partida. |
+| **UI-14** | Cronômetro Visual | Texto + barra de progresso | `10s` até `0s` | Oculto | Exibido somente quando o modo cronometrado está habilitado. |
+| **UI-15** | Controle de Sons | Toggle (`<input>`) | Ligado / Desligado | Ligado | Habilita ou silencia todos os efeitos sintetizados sem reiniciar a partida. |
+| **UI-16** | Movimento Reduzido | Toggle (`<input>`) | Ligado / Desligado | Desligado | Quando ligado, evita confetes e reduz transições sem alterar as regras. |
 
 ### IV2. Protótipo de Interface (Wireframe Low-Fi)
 
@@ -142,7 +163,8 @@ Uso recreativo e educacional frequente, com picos durante demonstrações ou aul
                           JOGO DA VELHA
 ===================================================================
 
- [ Modo de Jogo: 2 Jogadores (PVP) ▾ ]   [ Formato: Partida Única ▾ ]
+ [ Modo: 2 Jogadores (PVP) ▾ ]       [ Formato: Partida Única ▾ ]
+ [ Cronômetro: Desativado (Clássico) ▾ ]  [ Sons: ON | Movimento reduzido: OFF ]
 
  +---------------------------------------------------------------+
  |  JOGADOR X               RODADA                   JOGADOR O   |
@@ -150,6 +172,7 @@ Uso recreativo e educacional frequente, com picos durante demonstrações ou aul
  +---------------------------------------------------------------+
 
                        Vez do Jogador X
+                 [ Tempo da jogada: 10s ======== ] (opcional)
 
                       +-----+-----+-----+
                       |     |     |     |
@@ -231,6 +254,9 @@ Uso recreativo e educacional frequente, com picos durante demonstrações ou aul
 | **RF-06** | Linha de Vitória e Confetes | A1.2, A1.3 | UI-10 (Linha) + Canvas Confetti | Calcula ângulo/distância entre células e dispara partículas na vitória. |
 | **RF-07** | Placar e Transição de Rodada | A1.5, A1.7, E1.4 | UI-05, UI-06, UI-07 | Atualiza pontuação e limpa tabuleiro mantendo placar acumulado. |
 | **RF-08** | Reinício Geral | A3.1, A3.2 | UI-11 (Botão Reiniciar) | Reseta matriz de dados, placar, rodadas e estilos de tela. |
+| **RF-09** | Cronômetro Opcional | P2, P7, A4 | UI-12, UI-14 | Controla 10 segundos por turno humano e alterna a vez no tempo esgotado. |
+| **RF-10** | Dificuldade da CPU | A2.4 | UI-13 | Alterna entre escolha aleatória, estratégia tática e Minimax. |
+| **RF-11** | Preferências de Acessibilidade | P2, P4.2, A1.3 | UI-15, UI-16 | Permite silenciar áudio e reduzir movimento mantendo os padrões ativados. |
 
 ---
 
@@ -250,6 +276,12 @@ Uso recreativo e educacional frequente, com picos durante demonstrações ou aul
 | `cpuTimer`            | Number / `null`                 | `null`                  | Identificador do temporizador da jogada automática da CPU.                   |
 | `roundTimer`          | Number / `null`                 | `null`                  | Identificador do temporizador de preparação da próxima rodada.               |
 | `confettiAnimation`   | Number / `null`                 | `null`                  | Identificador da animação de confetes, permitindo seu cancelamento seguro.   |
+| `timerSelectValue`     | String                          | `'off'`                 | Configuração do cronômetro (`'off'` ou `'10'`).                              |
+| `difficultySelectValue` | String                         | `'easy'`                | Nível da CPU (`'easy'`, `'medium'` ou `'hard'`).                             |
+| `soundEnabled`         | Boolean                         | `true`                  | Indica se os efeitos sonoros devem ser sintetizados.                          |
+| `reducedMotion`        | Boolean                         | `false`                 | Indica se confetes e transições devem ser reduzidos.                          |
+| `turnTimer`            | Number / `null`                 | `null`                  | Identificador da contagem regressiva do turno atual.                          |
+| `timeLeft`             | Integer                         | `10`                    | Segundos restantes no turno cronometrado.                                     |
 
 ---
 
@@ -264,3 +296,6 @@ Uso recreativo e educacional frequente, com picos durante demonstrações ou aul
 * [x] **CA-05 (Regra do Melhor de 3):** No formato MD3, o jogo limpa o tabuleiro entre rodadas decisivas, repete a rodada atual em caso de empate e encerra a série quando um jogador atinge 2 vitórias — necessariamente até o fim da 3ª rodada decisiva.
 * [x] **CA-06 (Efeitos Visuais de Vitória):** A linha contínua é traçada corretamente exatamente sobre as 3 células vitoriosas e os confetes são disparados na tela.
 * [x] **CA-07 (Autonomia de Áudio):** O sistema emite os efeitos sonoros sem depender de downloads ou arquivos `.mp3` externos.
+* [x] **CA-08 (Cronômetro Compatível):** O cronômetro inicia desativado; quando habilitado, conta 10 segundos por turno humano, alerta nos 3 segundos finais e alterna a vez sem marcar uma célula ao chegar a zero.
+* [x] **CA-09 (Dificuldade da CPU):** O seletor aparece somente no modo CPU e diferencia os níveis Fácil, Médio e Difícil conforme as estratégias especificadas.
+* [x] **CA-10 (Preferências de Acessibilidade):** Sons podem ser silenciados e movimentos podem ser reduzidos sem reiniciar a partida, mantendo sons ligados e movimento completo como padrão.

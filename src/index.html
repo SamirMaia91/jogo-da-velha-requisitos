@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Jogo da Velha - UNIFOR</title>
+    <meta name="description" content="Jogo da Velha Web da UNIFOR com PVP, CPU, MD3, cronômetro opcional e recursos de acessibilidade.">
+    <meta name="theme-color" content="#003366">
+    <title>Jogo da Velha — UNIFOR</title>
 
     <style>
         :root {
             --azul-unifor: #003366;
             --azul-destaque: #0056b3;
+            --azul-claro: #eaf3fb;
             --laranja: #d97706;
+            --laranja-claro: #fff7ed;
             --fundo: #f4f6f9;
             --branco: #ffffff;
             --cinza: #64748b;
+            --cinza-escuro: #334155;
             --borda: #dbe2ea;
-            --verde: #16a34a;
+            --verde: #15803d;
+            --vermelho: #b91c1c;
+            --sombra: 0 22px 60px rgba(0, 51, 102, 0.14);
         }
 
         * {
@@ -25,133 +30,221 @@
             padding: 0;
         }
 
+        [hidden] {
+            display: none !important;
+        }
+
         body {
             min-height: 100vh;
-            background: var(--fundo);
-            font-family: Arial, Helvetica, sans-serif;
-            color: var(--azul-unifor);
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
+            display: grid;
+            place-items: center;
             padding: 24px;
+            color: var(--azul-unifor);
+            background:
+                radial-gradient(circle at 12% 12%, rgba(0, 86, 179, 0.11), transparent 30%),
+                radial-gradient(circle at 88% 88%, rgba(217, 119, 6, 0.10), transparent 28%),
+                var(--fundo);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button,
+        select,
+        input {
+            font: inherit;
         }
 
         .container {
-            width: 100%;
-            max-width: 720px;
-
-            background: var(--branco);
-
-            border-radius: 20px;
-            padding: 30px;
-
-            box-shadow: 0 10px 35px rgba(0, 51, 102, 0.12);
-
             position: relative;
+            width: min(100%, 760px);
             overflow: hidden;
+            padding: 32px;
+            border: 1px solid rgba(0, 51, 102, 0.08);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: var(--sombra);
         }
 
-        /* =========================
-           CABEÇALHO
-        ========================= */
+        .container::before {
+            position: absolute;
+            inset: 0 0 auto;
+            height: 7px;
+            content: "";
+            background: linear-gradient(90deg, var(--azul-unifor), var(--azul-destaque) 62%, var(--laranja));
+        }
 
         header {
+            margin-bottom: 24px;
             text-align: center;
-            margin-bottom: 25px;
         }
 
         .institucional {
-            color: var(--azul-destaque);
-            font-size: 0.85rem;
-            font-weight: bold;
-            letter-spacing: 2px;
             margin-bottom: 7px;
+            color: var(--azul-destaque);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
         }
 
         h1 {
             color: var(--azul-unifor);
-            font-size: 2rem;
-            letter-spacing: 1px;
+            font-size: clamp(1.8rem, 6vw, 2.45rem);
+            letter-spacing: 0.035em;
         }
 
-        /* =========================
-           CONFIGURAÇÕES
-        ========================= */
+        .subtitulo {
+            max-width: 560px;
+            margin: 8px auto 0;
+            color: var(--cinza);
+            font-size: 0.92rem;
+        }
 
         .configuracoes {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+            padding: 18px;
+            border: 1px solid var(--borda);
+            border-radius: 16px;
+            background: #f8fafc;
         }
 
         .campo-config {
             display: flex;
+            min-width: 0;
             flex-direction: column;
             gap: 7px;
         }
 
-        .campo-config label {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--cinza);
+        .campo-config label,
+        .preferencias-titulo {
+            color: var(--cinza-escuro);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.025em;
         }
 
         select {
             width: 100%;
-            padding: 11px 12px;
-
+            min-height: 44px;
+            padding: 10px 12px;
             border: 1px solid var(--borda);
-            border-radius: 8px;
-
-            background: white;
+            border-radius: 10px;
             color: var(--azul-unifor);
-
-            font-size: 0.95rem;
+            background: var(--branco);
             cursor: pointer;
         }
 
-        select:focus {
-            outline: 2px solid rgba(0, 86, 179, 0.2);
-            border-color: var(--azul-destaque);
+        select:hover {
+            border-color: #9eb8d1;
         }
 
-        /* =========================
-           PLACAR
-        ========================= */
+        select:focus-visible,
+        .restart:focus-visible,
+        .cell:focus-visible,
+        .toggle input:focus-visible + .toggle-ui {
+            outline: 3px solid rgba(0, 86, 179, 0.30);
+            outline-offset: 3px;
+        }
+
+        .preferencias {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 22px;
+            padding: 12px 15px;
+            border: 1px solid var(--borda);
+            border-radius: 14px;
+            background: var(--branco);
+        }
+
+        .preferencias-controles {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 14px;
+        }
+
+        .toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--cinza-escuro);
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .toggle-ui {
+            position: relative;
+            width: 38px;
+            height: 22px;
+            border-radius: 999px;
+            background: #cbd5e1;
+            transition: background 0.2s ease;
+        }
+
+        .toggle-ui::after {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--branco);
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+            content: "";
+            transition: transform 0.2s ease;
+        }
+
+        .toggle input:checked + .toggle-ui {
+            background: var(--azul-destaque);
+        }
+
+        .toggle input:checked + .toggle-ui::after {
+            transform: translateX(16px);
+        }
 
         .placar {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
-
-            background: #f8fafc;
+            margin-bottom: 18px;
+            padding: 17px;
             border: 1px solid var(--borda);
-            border-radius: 14px;
-
-            padding: 18px;
-            margin-bottom: 20px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #f8fafc, #eef5fb);
         }
 
-        .jogador-placar {
+        .jogador-placar,
+        .rodada {
             text-align: center;
         }
 
-        .jogador-placar .nome {
-            font-size: 0.85rem;
-            font-weight: bold;
+        .jogador-placar .nome,
+        .rodada span {
+            display: block;
             color: var(--cinza);
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.055em;
         }
 
         .jogador-placar .pontos {
             display: block;
-
-            margin-top: 5px;
-
+            margin-top: 3px;
             font-size: 2rem;
-            font-weight: bold;
+            font-weight: 850;
         }
 
         #scoreX {
@@ -163,105 +256,133 @@
         }
 
         .rodada {
-            text-align: center;
-            padding: 0 25px;
-        }
-
-        .rodada span {
-            display: block;
-
-            font-size: 0.75rem;
-            color: var(--cinza);
-            font-weight: bold;
-
-            margin-bottom: 4px;
+            min-width: 92px;
+            padding: 7px 18px;
+            border-right: 1px solid var(--borda);
+            border-left: 1px solid var(--borda);
         }
 
         #roundDisplay {
+            display: block;
+            margin-top: 4px;
             font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--azul-unifor);
         }
-
-        /* =========================
-           STATUS
-        ========================= */
 
         .status {
-            min-height: 35px;
-
             display: flex;
-            justify-content: center;
+            min-height: 42px;
             align-items: center;
-
-            text-align: center;
-
-            font-weight: bold;
+            justify-content: center;
+            margin-bottom: 12px;
+            padding: 8px 14px;
+            border-radius: 12px;
             color: var(--azul-unifor);
-
-            margin-bottom: 18px;
+            background: var(--azul-claro);
+            font-weight: 800;
+            text-align: center;
         }
 
-        .final-message {
+        .status.final-message {
             color: var(--verde);
+            background: #ecfdf3;
         }
 
-        /* =========================
-           TABULEIRO
-        ========================= */
+        .status.warning-message {
+            color: #92400e;
+            background: var(--laranja-claro);
+        }
+
+        .turn-timer {
+            margin: 0 auto 16px;
+            padding: 10px 14px;
+            border: 1px solid #bfd3e5;
+            border-radius: 12px;
+            background: #f8fbff;
+        }
+
+        .timer-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 7px;
+            color: var(--cinza-escuro);
+            font-size: 0.77rem;
+            font-weight: 800;
+        }
+
+        #timerValue {
+            color: var(--azul-destaque);
+            font-size: 1rem;
+        }
+
+        .timer-track {
+            height: 7px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #dce8f2;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--azul-destaque), #38bdf8);
+            transition: width 0.25s linear, background 0.2s ease;
+        }
+
+        .turn-timer.urgent {
+            border-color: #fdba74;
+            background: var(--laranja-claro);
+        }
+
+        .turn-timer.urgent #timerValue {
+            color: var(--vermelho);
+        }
+
+        .turn-timer.urgent .timer-bar {
+            background: linear-gradient(90deg, var(--vermelho), var(--laranja));
+        }
 
         .board-container {
-            width: min(400px, 90vw);
-            aspect-ratio: 1 / 1;
-
-            margin: 0 auto 25px;
-
             position: relative;
+            width: min(400px, 88vw);
+            aspect-ratio: 1;
+            margin: 0 auto 22px;
         }
 
         .board {
+            display: grid;
             width: 100%;
             height: 100%;
-
-            display: grid;
-
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-
             gap: 8px;
-
-            background: var(--azul-unifor);
-
             padding: 8px;
+            border-radius: 16px;
+            background: var(--azul-unifor);
+            box-shadow: 0 12px 30px rgba(0, 51, 102, 0.18);
+        }
 
-            border-radius: 12px;
+        .board[aria-busy="true"] {
+            filter: saturate(0.84);
         }
 
         .cell {
-            border: none;
-            border-radius: 7px;
-
-            background: white;
-
-            font-size: clamp(2.5rem, 10vw, 4.5rem);
-            font-weight: bold;
-
+            border: 0;
+            border-radius: 9px;
+            color: var(--azul-unifor);
+            background: var(--branco);
+            font-size: clamp(2.6rem, 10vw, 4.6rem);
+            font-weight: 900;
             cursor: pointer;
-
-            transition:
-                transform 0.12s ease,
-                background 0.12s ease;
+            transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
         }
 
         .cell:hover:not(:disabled) {
-            background: #eef5fb;
+            z-index: 1;
+            background: #eef6fd;
+            box-shadow: inset 0 0 0 3px rgba(0, 86, 179, 0.14);
             transform: scale(0.97);
-        }
-
-        .cell:focus-visible,
-        .restart:focus-visible {
-            outline: 3px solid rgba(0, 86, 179, 0.45);
-            outline-offset: 3px;
         }
 
         .cell:disabled {
@@ -276,106 +397,99 @@
             color: var(--laranja);
         }
 
-        /* =========================
-           LINHA DA VITÓRIA
-        ========================= */
-
         .win-line {
             position: absolute;
-
-            height: 6px;
-
-            background: var(--laranja);
-
-            border-radius: 10px;
-
-            transform-origin: left center;
-
-            opacity: 0;
-
-            pointer-events: none;
-
             z-index: 5;
-
-            transition: opacity 0.25s ease;
+            height: 7px;
+            border-radius: 999px;
+            opacity: 0;
+            pointer-events: none;
+            background: linear-gradient(90deg, var(--laranja), #f59e0b);
+            box-shadow: 0 0 12px rgba(217, 119, 6, 0.48);
+            transform-origin: left center;
+            transition: opacity 0.22s ease;
         }
 
         .win-line.visible {
             opacity: 1;
         }
 
-        /* =========================
-           BOTÃO
-        ========================= */
+        .acoes {
+            display: flex;
+            justify-content: center;
+        }
 
         .restart {
-            display: block;
-
-            margin: 0 auto;
-
-            padding: 13px 25px;
-
-            border: none;
-            border-radius: 8px;
-
-            background: var(--azul-unifor);
-            color: white;
-
-            font-size: 0.9rem;
-            font-weight: bold;
-
+            min-width: 190px;
+            padding: 13px 24px;
+            border: 0;
+            border-radius: 10px;
+            color: var(--branco);
+            background: linear-gradient(135deg, var(--azul-unifor), var(--azul-destaque));
+            box-shadow: 0 8px 18px rgba(0, 51, 102, 0.20);
+            font-size: 0.86rem;
+            font-weight: 850;
+            letter-spacing: 0.045em;
             cursor: pointer;
-
-            transition:
-                background 0.2s ease,
-                transform 0.1s ease;
+            transition: transform 0.12s ease, box-shadow 0.2s ease;
         }
 
         .restart:hover {
-            background: var(--azul-destaque);
+            box-shadow: 0 11px 24px rgba(0, 51, 102, 0.26);
+            transform: translateY(-1px);
         }
 
         .restart:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
         }
 
-        /* =========================
-           CONFETES
-        ========================= */
+        .dica {
+            margin-top: 14px;
+            color: var(--cinza);
+            font-size: 0.76rem;
+            text-align: center;
+        }
 
         #confettiCanvas {
             position: fixed;
-
+            z-index: 9999;
             inset: 0;
-
             width: 100vw;
             height: 100vh;
-
             pointer-events: none;
-
-            z-index: 9999;
         }
 
-        /* =========================
-           RESPONSIVIDADE
-        ========================= */
+        .reduce-motion *,
+        .reduce-motion *::before,
+        .reduce-motion *::after {
+            scroll-behavior: auto !important;
+            transition-duration: 0.001ms !important;
+            animation-duration: 0.001ms !important;
+        }
 
-        @media (max-width: 550px) {
-
+        @media (max-width: 620px) {
             body {
                 padding: 12px;
             }
 
             .container {
-                padding: 20px 15px;
-            }
-
-            h1 {
-                font-size: 1.6rem;
+                padding: 25px 15px 22px;
+                border-radius: 18px;
             }
 
             .configuracoes {
                 grid-template-columns: 1fr;
+                padding: 14px;
+            }
+
+            .preferencias {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .preferencias-controles {
+                width: 100%;
+                justify-content: space-between;
             }
 
             .placar {
@@ -383,1845 +497,969 @@
             }
 
             .rodada {
-                padding: 0 10px;
+                min-width: 78px;
+                padding: 6px 10px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .preferencias-controles {
+                align-items: flex-start;
+                flex-direction: column;
             }
         }
     </style>
 </head>
 
 <body>
-
     <canvas id="confettiCanvas" aria-hidden="true"></canvas>
 
     <main class="container">
-
-        <!-- CABEÇALHO -->
-
         <header>
-            <div class="institucional">
-                UNIVERSIDADE DE FORTALEZA
-            </div>
-
+            <div class="institucional">UNIVERSIDADE DE FORTALEZA</div>
             <h1>JOGO DA VELHA</h1>
+            <p class="subtitulo">Modo clássico preservado, com opções avançadas para quem deseja um novo desafio.</p>
         </header>
 
-
-        <!-- CONFIGURAÇÕES -->
-
-        <section class="configuracoes">
-
+        <section class="configuracoes" aria-label="Configurações da partida">
             <div class="campo-config">
-
-                <label for="modeSelect">
-                    Modo de Jogo
-                </label>
-
+                <label for="modeSelect">Modo de Jogo</label>
                 <select id="modeSelect">
-
-                    <option value="pvp">
-                        2 Jogadores (PVP)
-                    </option>
-
-                    <option value="cpu">
-                        Contra o Computador
-                    </option>
-
+                    <option value="pvp">2 Jogadores (PVP)</option>
+                    <option value="cpu">Contra o Computador</option>
                 </select>
-
             </div>
-
 
             <div class="campo-config">
-
-                <label for="formatSelect">
-                    Formato da Partida
-                </label>
-
+                <label for="formatSelect">Formato da Partida</label>
                 <select id="formatSelect">
-
-                    <option value="single">
-                        Partida Única
-                    </option>
-
-                    <option value="bo3">
-                        Melhor de 3 (MD3)
-                    </option>
-
+                    <option value="single">Partida Única</option>
+                    <option value="bo3">Melhor de 3 (MD3)</option>
                 </select>
-
             </div>
 
+            <div class="campo-config">
+                <label for="timerSelect">Cronômetro por Jogada</label>
+                <select id="timerSelect">
+                    <option value="off">Desativado (Clássico)</option>
+                    <option value="10">10 segundos</option>
+                </select>
+            </div>
+
+            <div class="campo-config" id="difficultyField" hidden>
+                <label for="difficultySelect">Dificuldade da CPU</label>
+                <select id="difficultySelect">
+                    <option value="easy">Fácil — Aleatória</option>
+                    <option value="medium">Médio — Estratégica</option>
+                    <option value="hard">Difícil — Minimax</option>
+                </select>
+            </div>
         </section>
 
+        <section class="preferencias" aria-label="Preferências de acessibilidade">
+            <span class="preferencias-titulo">ACESSIBILIDADE</span>
 
-        <!-- PLACAR -->
+            <div class="preferencias-controles">
+                <label class="toggle">
+                    <input id="soundToggle" type="checkbox" checked>
+                    <span class="toggle-ui" aria-hidden="true"></span>
+                    <span>Sons</span>
+                </label>
 
-        <section class="placar">
-
-            <div class="jogador-placar">
-
-                <span class="nome">
-                    JOGADOR X
-                </span>
-
-                <span class="pontos" id="scoreX">
-                    0
-                </span>
-
+                <label class="toggle">
+                    <input id="motionToggle" type="checkbox">
+                    <span class="toggle-ui" aria-hidden="true"></span>
+                    <span>Reduzir animações</span>
+                </label>
             </div>
+        </section>
 
+        <section class="placar" aria-label="Placar da partida">
+            <div class="jogador-placar">
+                <span class="nome">JOGADOR X</span>
+                <span class="pontos" id="scoreX">0</span>
+            </div>
 
             <div class="rodada">
-
-                <span>
-                    RODADA
-                </span>
-
-                <strong id="roundDisplay">
-                    1/1
-                </strong>
-
+                <span>RODADA</span>
+                <strong id="roundDisplay">1/1</strong>
             </div>
-
 
             <div class="jogador-placar">
-
-                <span class="nome" id="playerOLabel">
-                    JOGADOR O
-                </span>
-
-                <span class="pontos" id="scoreO">
-                    0
-                </span>
-
+                <span class="nome" id="playerOLabel">JOGADOR O</span>
+                <span class="pontos" id="scoreO">0</span>
             </div>
-
         </section>
-
-
-        <!-- STATUS -->
 
         <div class="status" id="status" role="status" aria-live="polite">
             Vez do Jogador X
         </div>
 
-
-        <!-- TABULEIRO -->
+        <div class="turn-timer" id="timerPanel" role="timer" aria-live="off" hidden>
+            <div class="timer-meta">
+                <span>TEMPO DA JOGADA</span>
+                <strong id="timerValue">10s</strong>
+            </div>
+            <div class="timer-track" aria-hidden="true">
+                <div class="timer-bar" id="timerBar"></div>
+            </div>
+        </div>
 
         <div class="board-container">
-
-            <div class="board" id="board">
-
-                <button class="cell" type="button" data-index="0" aria-label="Célula 1"></button>
-                <button class="cell" type="button" data-index="1" aria-label="Célula 2"></button>
-                <button class="cell" type="button" data-index="2" aria-label="Célula 3"></button>
-
-                <button class="cell" type="button" data-index="3" aria-label="Célula 4"></button>
-                <button class="cell" type="button" data-index="4" aria-label="Célula 5"></button>
-                <button class="cell" type="button" data-index="5" aria-label="Célula 6"></button>
-
-                <button class="cell" type="button" data-index="6" aria-label="Célula 7"></button>
-                <button class="cell" type="button" data-index="7" aria-label="Célula 8"></button>
-                <button class="cell" type="button" data-index="8" aria-label="Célula 9"></button>
-
+            <div class="board" id="board" role="grid" aria-label="Tabuleiro 3 por 3">
+                <button class="cell" type="button" role="gridcell" data-index="0" aria-label="Célula 1, vazia"></button>
+                <button class="cell" type="button" role="gridcell" data-index="1" aria-label="Célula 2, vazia"></button>
+                <button class="cell" type="button" role="gridcell" data-index="2" aria-label="Célula 3, vazia"></button>
+                <button class="cell" type="button" role="gridcell" data-index="3" aria-label="Célula 4, vazia"></button>
+                <button class="cell" type="button" role="gridcell" data-index="4" aria-label="Célula 5, vazia"></button>
+                <button class="cell" type="button" role="gridcell" data-index="5" aria-label="Célula 6, vazia"></button>
+                <button class="cell" type="button" role="gridcell" data-index="6" aria-label="Célula 7, vazia"></button>
+                <button class="cell" type="button" role="gridcell" data-index="7" aria-label="Célula 8, vazia"></button>
+                <button class="cell" type="button" role="gridcell" data-index="8" aria-label="Célula 9, vazia"></button>
             </div>
 
             <div class="win-line" id="winLine" aria-hidden="true"></div>
-
         </div>
 
+        <div class="acoes">
+            <button class="restart" id="restartButton" type="button">
+                REINICIAR JOGO
+            </button>
+        </div>
 
-        <!-- REINICIAR -->
-
-        <button class="restart" id="restartButton" type="button">
-            REINICIAR JOGO
-        </button>
-
+        <p class="dica">X inicia todas as rodadas. Use Tab, Enter ou Espaço para jogar pelo teclado.</p>
     </main>
 
-
     <script>
-
-        /* =========================================================
-           1. ELEMENTOS DA INTERFACE
-        ========================================================= */
-
+        /* Elementos da interface */
         const cells = document.querySelectorAll(".cell");
+        const statusElement = document.getElementById("status");
+        const scoreXElement = document.getElementById("scoreX");
+        const scoreOElement = document.getElementById("scoreO");
+        const roundDisplay = document.getElementById("roundDisplay");
+        const modeSelect = document.getElementById("modeSelect");
+        const formatSelect = document.getElementById("formatSelect");
+        const timerSelect = document.getElementById("timerSelect");
+        const difficultySelect = document.getElementById("difficultySelect");
+        const difficultyField = document.getElementById("difficultyField");
+        const soundToggle = document.getElementById("soundToggle");
+        const motionToggle = document.getElementById("motionToggle");
+        const playerOLabel = document.getElementById("playerOLabel");
+        const restartButton = document.getElementById("restartButton");
+        const container = document.querySelector(".container");
+        const board = document.getElementById("board");
+        const boardContainer = document.querySelector(".board-container");
+        const winLine = document.getElementById("winLine");
+        const timerPanel = document.getElementById("timerPanel");
+        const timerValue = document.getElementById("timerValue");
+        const timerBar = document.getElementById("timerBar");
 
-        const statusElement =
-            document.getElementById("status");
-
-        const scoreXElement =
-            document.getElementById("scoreX");
-
-        const scoreOElement =
-            document.getElementById("scoreO");
-
-        const roundDisplay =
-            document.getElementById("roundDisplay");
-
-        const modeSelect =
-            document.getElementById("modeSelect");
-
-        const formatSelect =
-            document.getElementById("formatSelect");
-
-        const playerOLabel =
-            document.getElementById("playerOLabel");
-
-        const restartButton =
-            document.getElementById("restartButton");
-
-        const boardContainer =
-            document.querySelector(".board-container");
-
-        const winLine =
-            document.getElementById("winLine");
-
-
-        /* =========================================================
-           2. ESTADO DO JOGO
-        ========================================================= */
-
-        let options = Array(9).fill("");
-
-        let currentPlayer = "X";
-
-        let running = true;
-
-        let winsX = 0;
-
-        let winsO = 0;
-
-        let currentRound = 1;
-
-        let modeSelectValue = "pvp";
-
-        let formatSelectValue = "single";
-
-        let roundFinished = false;
-
-
-        /*
-         * IMPORTANTE:
-         *
-         * Guardamos os IDs dos timers.
-         *
-         * Isso permite cancelar:
-         *
-         * 1. Timer da CPU
-         * 2. Timer da próxima rodada
-         *
-         * quando o usuário reinicia
-         * ou altera uma configuração.
-         */
-
-        let cpuTimer = null;
-
-        let roundTimer = null;
-
-
-        /* =========================================================
-           3. COMBINAÇÕES DE VITÓRIA
-        ========================================================= */
-
+        /* Estado principal */
+        const TURN_DURATION = 10;
         const winPatterns = [
-
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-
-            [0, 4, 8],
-            [2, 4, 6]
-
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
         ];
 
+        let options = Array(9).fill("");
+        let currentPlayer = "X";
+        let running = true;
+        let winsX = 0;
+        let winsO = 0;
+        let currentRound = 1;
+        let modeSelectValue = "pvp";
+        let formatSelectValue = "single";
+        let timerSelectValue = "off";
+        let difficultySelectValue = "easy";
+        let soundEnabled = true;
+        let reducedMotion = false;
+        let roundFinished = false;
+        let cpuTimer = null;
+        let roundTimer = null;
+        let turnTimer = null;
+        let timeLeft = TURN_DURATION;
+        let activeWinningPattern = null;
 
-        /* =========================================================
-           4. EVENTOS DAS CÉLULAS
-        ========================================================= */
-
-        cells.forEach(cell => {
-
-            cell.addEventListener("click", () => {
-
-                const index =
-                    Number(cell.dataset.index);
-
-                playMove(index);
-
+        /* Eventos */
+        cells.forEach(function (cell) {
+            cell.addEventListener("click", function () {
+                playMove(Number(cell.dataset.index));
             });
-
         });
 
+        modeSelect.addEventListener("change", function () {
+            modeSelectValue = modeSelect.value;
+            difficultyField.hidden = modeSelectValue !== "cpu";
+            playerOLabel.textContent = modeSelectValue === "cpu" ? "COMPUTADOR" : "JOGADOR O";
+            resetGame();
+        });
 
-        /* =========================================================
-           5. REALIZA UMA JOGADA
-        ========================================================= */
+        formatSelect.addEventListener("change", function () {
+            formatSelectValue = formatSelect.value;
+            resetGame();
+        });
 
+        timerSelect.addEventListener("change", function () {
+            timerSelectValue = timerSelect.value;
+            resetGame();
+        });
+
+        difficultySelect.addEventListener("change", function () {
+            difficultySelectValue = difficultySelect.value;
+            resetGame();
+        });
+
+        soundToggle.addEventListener("change", function () {
+            soundEnabled = soundToggle.checked;
+            if (soundEnabled) {
+                playTone(520, 0.08, "sine", 0.07);
+            }
+        });
+
+        motionToggle.addEventListener("change", function () {
+            reducedMotion = motionToggle.checked;
+            container.classList.toggle("reduce-motion", reducedMotion);
+            if (reducedMotion) {
+                stopConfetti();
+            }
+        });
+
+        restartButton.addEventListener("click", resetGame);
+
+        /* Jogadas */
         function playMove(index) {
-
-            /*
-             * Não permite jogar quando:
-             *
-             * - jogo está bloqueado
-             * - célula já foi utilizada
-             */
-
             if (
                 !running ||
-                options[index] !== ""
+                options[index] !== "" ||
+                (modeSelectValue === "cpu" && currentPlayer === "O")
             ) {
                 return;
             }
 
-
-            /*
-             * Registra a jogada.
-             */
-
-            options[index] =
-                currentPlayer;
-
-
+            stopTurnTimer(true);
+            options[index] = currentPlayer;
             updateCell(index);
-
-
             playMoveSound(currentPlayer);
 
-
-            /*
-             * Verifica vitória.
-             */
-
-            const winningPattern =
-                checkWinner();
-
+            const winningPattern = checkWinner();
 
             if (winningPattern) {
-
-                finishRoundWithWinner(
-                    currentPlayer,
-                    winningPattern
-                );
-
+                finishRoundWithWinner(currentPlayer, winningPattern);
                 return;
             }
-
-
-            /*
-             * Verifica empate.
-             */
 
             if (checkDraw()) {
-
                 finishRoundWithDraw();
-
                 return;
             }
 
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
 
-            /*
-             * Troca jogador.
-             */
-
-            currentPlayer =
-                currentPlayer === "X"
-                    ? "O"
-                    : "X";
-
-
-            updateStatus();
-
-
-            /*
-             * CPU joga automaticamente.
-             */
-
-            if (
-                modeSelectValue === "cpu" &&
-                currentPlayer === "O"
-            ) {
-
+            if (modeSelectValue === "cpu" && currentPlayer === "O") {
                 computerMove();
-
+            } else {
+                updateStatus();
             }
-
         }
-
-
-        /* =========================================================
-           6. ATUALIZA CÉLULA
-        ========================================================= */
 
         function updateCell(index) {
-
             const cell = cells[index];
+            const value = options[index];
 
-            cell.textContent =
-                options[index];
+            cell.textContent = value;
+            cell.classList.remove("x", "o");
 
-            cell.classList.remove(
-                "x",
-                "o"
-            );
-
-
-            if (options[index] === "X") {
-
-                cell.classList.add("x");
-
+            if (value) {
+                cell.classList.add(value.toLowerCase());
+                cell.setAttribute("aria-label", "Célula " + (index + 1) + ", marcada com " + value);
+            } else {
+                cell.setAttribute("aria-label", "Célula " + (index + 1) + ", vazia");
             }
 
-
-            if (options[index] === "O") {
-
-                cell.classList.add("o");
-
-            }
-
-
-            /*
-             * Impede clicar novamente
-             * na mesma célula.
-             */
-
-            cell.disabled = true;
-
+            syncCellAvailability();
         }
 
+        function syncCellAvailability() {
+            cells.forEach(function (cell, index) {
+                cell.disabled = !running || options[index] !== "";
+            });
 
-        /* =========================================================
-           7. VERIFICA VENCEDOR
-        ========================================================= */
+            board.setAttribute(
+                "aria-busy",
+                String(modeSelectValue === "cpu" && currentPlayer === "O" && !roundFinished)
+            );
+        }
+
+        function getWinningPattern(boardState, player) {
+            return winPatterns.find(function (pattern) {
+                return pattern.every(function (index) {
+                    return boardState[index] === player;
+                });
+            }) || null;
+        }
 
         function checkWinner() {
-
-            for (
-                const pattern of winPatterns
-            ) {
-
-                const [a, b, c] =
-                    pattern;
-
-
-                if (
-                    options[a] !== "" &&
-                    options[a] === options[b] &&
-                    options[a] === options[c]
-                ) {
-
-                    return pattern;
-
-                }
-
-            }
-
-            return null;
-
+            return getWinningPattern(options, "X") || getWinningPattern(options, "O");
         }
-
-
-        /* =========================================================
-           8. VERIFICA EMPATE
-        ========================================================= */
 
         function checkDraw() {
-
-            return options.every(
-                cell => cell !== ""
-            );
-
+            return options.every(function (cell) {
+                return cell !== "";
+            });
         }
 
-
-        /* =========================================================
-           9. FINALIZA COM VITÓRIA
-        ========================================================= */
-
-        function finishRoundWithWinner(
-            winner,
-            winningPattern
-        ) {
-
-            /*
-             * Bloqueia imediatamente.
-             */
-
+        /* Encerramento e MD3 */
+        function finishRoundWithWinner(winner, winningPattern) {
             running = false;
-
             roundFinished = true;
-
-
-            drawWinningLine(
-                winningPattern
-            );
-
-
+            activeWinningPattern = winningPattern;
+            stopTurnTimer(true);
+            syncCellAvailability();
+            drawWinningLine(winningPattern);
             launchConfetti();
-
-
             playWinSound();
 
-
-            /*
-             * Atualiza placar.
-             */
-
             if (winner === "X") {
-
                 winsX++;
-
             } else {
-
                 winsO++;
-
             }
-
 
             updateScore();
 
-
             const winnerName =
-                winner === "O" &&
-                modeSelectValue === "cpu"
+                winner === "O" && modeSelectValue === "cpu"
                     ? "Computador"
-                    : `Jogador ${winner}`;
+                    : "Jogador " + winner;
 
-
-            statusElement.textContent =
-                `${winnerName} venceu a rodada!`;
-
-            statusElement.classList.add(
-                "final-message"
-            );
-
+            statusElement.textContent = winnerName + " venceu a rodada!";
+            statusElement.classList.remove("warning-message");
+            statusElement.classList.add("final-message");
 
             handleRoundEnd();
-
         }
-
-
-        /* =========================================================
-           10. FINALIZA COM EMPATE
-        ========================================================= */
 
         function finishRoundWithDraw() {
-
             running = false;
-
             roundFinished = true;
-
-
+            stopTurnTimer(true);
+            syncCellAvailability();
             playDrawSound();
 
-
-            statusElement.textContent =
-                "Rodada Empatada!";
-
-            statusElement.classList.add(
-                "final-message"
-            );
-
+            statusElement.textContent = "Rodada Empatada!";
+            statusElement.classList.remove("warning-message");
+            statusElement.classList.add("final-message");
 
             handleDrawEnd();
-
         }
-
-
-        /* =========================================================
-           11. FIM DA RODADA
-        ========================================================= */
 
         function handleRoundEnd() {
-
-            /*
-             * Partida única:
-             * fica aguardando o usuário reiniciar.
-             */
-
-            if (
-                formatSelectValue === "single"
-            ) {
-
+            if (formatSelectValue === "single") {
                 return;
-
             }
 
-
-            /*
-             * MD3:
-             * quem fizer 2 vitórias
-             * é campeão.
-             */
-
-            if (
-                winsX >= 2 ||
-                winsO >= 2
-            ) {
-
-                const champion =
-                    winsX >= 2
-                        ? "X"
-                        : "O";
-
-
+            if (winsX >= 2 || winsO >= 2) {
+                const champion = winsX >= 2 ? "X" : "O";
                 const championName =
-                    champion === "X"
-                        ? "Jogador X"
-                        : (
-                            modeSelectValue === "cpu"
-                                ? "Computador"
-                                : "Jogador O"
-                        );
+                    champion === "O" && modeSelectValue === "cpu"
+                        ? "Computador"
+                        : "Jogador " + champion;
 
-
-                statusElement.textContent =
-                    `${championName} é o campeão da partida!`;
-
+                statusElement.textContent = championName + " é o campeão da partida!";
                 return;
-
             }
-
-
-            /*
-             * Próxima rodada.
-             */
 
             if (currentRound < 3) {
-
-                /*
-                 * Cancela qualquer timer
-                 * anterior antes de criar outro.
-                 */
-
-                clearTimeout(roundTimer);
-
-
-                roundTimer = setTimeout(() => {
-
-                    roundTimer = null;
-
-
-                    /*
-                     * IMPORTANTE:
-                     *
-                     * O timer só pode continuar
-                     * se o jogo ainda estiver
-                     * no estado esperado.
-                     */
-
-                    if (
-                        !roundFinished ||
-                        formatSelectValue !== "bo3"
-                    ) {
-                        return;
-                    }
-
-
-                    currentRound++;
-
-                    prepareNextRound();
-
-                }, 2000);
-
+                scheduleRoundTransition(true);
             }
-
         }
-
-
-        /* =========================================================
-           12. EMPATE NO MD3
-        ========================================================= */
 
         function handleDrawEnd() {
-
-            if (
-                formatSelectValue === "single"
-            ) {
-
+            if (formatSelectValue === "single") {
                 return;
-
             }
 
-
-            if (currentRound < 3) {
-
-                clearTimeout(roundTimer);
-
-
-                roundTimer = setTimeout(() => {
-
-                    roundTimer = null;
-
-
-                    if (
-                        !roundFinished ||
-                        formatSelectValue !== "bo3"
-                    ) {
-                        return;
-                    }
-
-
-                    /*
-                     * Empate não incrementa
-                     * a rodada.
-                     */
-
-                    prepareNextRound();
-
-                }, 2000);
-
-            } else {
-
-                statusElement.textContent =
-                    "Partida encerrada com empate!";
-
-            }
-
+            /*
+             * Empates não consomem rodada decisiva, inclusive em 3/3.
+             */
+            scheduleRoundTransition(false);
         }
 
+        function scheduleRoundTransition(advanceRound) {
+            clearTimeout(roundTimer);
 
-        /* =========================================================
-           13. PREPARA PRÓXIMA RODADA
-        ========================================================= */
+            roundTimer = setTimeout(function () {
+                roundTimer = null;
+
+                if (!roundFinished || formatSelectValue !== "bo3") {
+                    return;
+                }
+
+                if (advanceRound) {
+                    currentRound++;
+                }
+
+                prepareNextRound();
+            }, 2000);
+        }
 
         function prepareNextRound() {
-
             stopConfetti();
-
-            options =
-                Array(9).fill("");
-
-
-            /*
-             * X começa todas as rodadas.
-             */
-
+            stopTurnTimer(true);
+            options = Array(9).fill("");
             currentPlayer = "X";
-
-
             running = true;
-
             roundFinished = false;
-
-
+            activeWinningPattern = null;
             hideWinningLine();
+            statusElement.classList.remove("final-message", "warning-message");
 
-
-            statusElement.classList.remove(
-                "final-message"
-            );
-
-
-            /*
-             * Limpa células.
-             */
-
-            cells.forEach(cell => {
-
+            cells.forEach(function (cell, index) {
                 cell.textContent = "";
-
-                cell.disabled = false;
-
-                cell.classList.remove(
-                    "x",
-                    "o"
-                );
-
+                cell.classList.remove("x", "o");
+                cell.setAttribute("aria-label", "Célula " + (index + 1) + ", vazia");
             });
 
-
+            syncCellAvailability();
             updateRoundDisplay();
-
             updateStatus();
-
         }
 
-
-        /* =========================================================
-           14. JOGADA DO COMPUTADOR
-        ========================================================= */
-
-        function computerMove() {
-
-            /*
-             * Bloqueia jogador durante
-             * os 400ms de espera.
-             */
-
+        /* CPU */
+        function computerMove(prefixMessage) {
             running = false;
+            stopTurnTimer(true);
+            syncCellAvailability();
 
-
+            statusElement.classList.remove("final-message");
+            statusElement.classList.toggle("warning-message", Boolean(prefixMessage));
             statusElement.textContent =
-                "Computador pensando...";
-
-
-            /*
-             * Cancela timer anterior.
-             */
+                (prefixMessage ? prefixMessage + " " : "") +
+                "Computador pensando (" + getDifficultyLabel() + ")...";
 
             clearTimeout(cpuTimer);
 
-
-            /*
-             * TIMER DE 400ms
-             *
-             * Agora o ID fica salvo em
-             * cpuTimer.
-             */
-
-            cpuTimer = setTimeout(() => {
-
+            cpuTimer = setTimeout(function () {
                 cpuTimer = null;
-
-
-                /*
-                 * Se o usuário reiniciou,
-                 * mudou de modo ou o jogo
-                 * não está mais na vez da CPU,
-                 * o timer não faz nada.
-                 */
 
                 if (
                     modeSelectValue !== "cpu" ||
-                    formatSelectValue === "" ||
-                    currentPlayer !== "O"
+                    currentPlayer !== "O" ||
+                    roundFinished
                 ) {
-
                     return;
-
                 }
 
+                const emptyPositions = getEmptyPositions(options);
 
-                /*
-                 * Procura posições vazias.
-                 */
-
-                const emptyPositions = [];
-
-
-                options.forEach(
-                    (value, index) => {
-
-                        if (value === "") {
-
-                            emptyPositions.push(index);
-
-                        }
-
-                    }
-                );
-
-
-                if (
-                    emptyPositions.length === 0
-                ) {
-
+                if (emptyPositions.length === 0) {
                     return;
-
                 }
 
-
-                /*
-                 * Escolhe aleatoriamente.
-                 */
-
-                const randomIndex =
-                    Math.floor(
-                        Math.random() *
-                        emptyPositions.length
-                    );
-
-
-                const chosenPosition =
-                    emptyPositions[
-                        randomIndex
-                    ];
-
-
-                /*
-                 * Realiza jogada da CPU.
-                 */
-
+                const chosenPosition = chooseComputerPosition(emptyPositions);
                 options[chosenPosition] = "O";
-
-
-                updateCell(
-                    chosenPosition
-                );
-
-
+                updateCell(chosenPosition);
                 playMoveSound("O");
 
-
-                /*
-                 * Verifica vitória.
-                 */
-
-                const winningPattern =
-                    checkWinner();
-
+                const winningPattern = checkWinner();
 
                 if (winningPattern) {
-
-                    finishRoundWithWinner(
-                        "O",
-                        winningPattern
-                    );
-
+                    finishRoundWithWinner("O", winningPattern);
                     return;
-
                 }
-
-
-                /*
-                 * Verifica empate.
-                 */
 
                 if (checkDraw()) {
-
                     finishRoundWithDraw();
-
                     return;
-
                 }
-
-
-                /*
-                 * Volta para X.
-                 */
 
                 currentPlayer = "X";
-
                 running = true;
-
+                statusElement.classList.remove("warning-message");
+                syncCellAvailability();
                 updateStatus();
-
             }, 400);
-
         }
 
+        function getEmptyPositions(boardState) {
+            const emptyPositions = [];
 
-        /* =========================================================
-           15. ATUALIZA STATUS
-        ========================================================= */
-
-        function updateStatus() {
-
-            if (running) {
-
-                if (
-                    modeSelectValue === "cpu" &&
-                    currentPlayer === "O"
-                ) {
-
-                    statusElement.textContent =
-                        "Vez do Computador";
-
-                    return;
-
+            boardState.forEach(function (value, index) {
+                if (value === "") {
+                    emptyPositions.push(index);
                 }
+            });
 
+            return emptyPositions;
+        }
 
-                statusElement.textContent =
-                    `Vez do Jogador ${currentPlayer}`;
-
+        function chooseComputerPosition(emptyPositions) {
+            if (difficultySelectValue === "easy") {
+                return randomPosition(emptyPositions);
             }
 
+            const winningMove = findWinningMove("O");
+            if (winningMove !== null) {
+                return winningMove;
+            }
+
+            const blockingMove = findWinningMove("X");
+            if (blockingMove !== null) {
+                return blockingMove;
+            }
+
+            if (difficultySelectValue === "medium") {
+                if (options[4] === "") {
+                    return 4;
+                }
+
+                return randomPosition(emptyPositions);
+            }
+
+            return getBestMove();
         }
 
+        function randomPosition(positions) {
+            return positions[Math.floor(Math.random() * positions.length)];
+        }
 
-        /* =========================================================
-           16. ATUALIZA PLACAR
-        ========================================================= */
+        function findWinningMove(player) {
+            const emptyPositions = getEmptyPositions(options);
+
+            for (const index of emptyPositions) {
+                options[index] = player;
+                const isWinning = Boolean(getWinningPattern(options, player));
+                options[index] = "";
+
+                if (isWinning) {
+                    return index;
+                }
+            }
+
+            return null;
+        }
+
+        function getBestMove() {
+            let bestScore = -Infinity;
+            let bestMove = getEmptyPositions(options)[0];
+
+            getEmptyPositions(options).forEach(function (index) {
+                options[index] = "O";
+                const score = minimax(options, false, 0);
+                options[index] = "";
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = index;
+                }
+            });
+
+            return bestMove;
+        }
+
+        function minimax(boardState, isMaximizing, depth) {
+            if (getWinningPattern(boardState, "O")) {
+                return 10 - depth;
+            }
+
+            if (getWinningPattern(boardState, "X")) {
+                return depth - 10;
+            }
+
+            const emptyPositions = getEmptyPositions(boardState);
+
+            if (emptyPositions.length === 0) {
+                return 0;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+
+                emptyPositions.forEach(function (index) {
+                    boardState[index] = "O";
+                    bestScore = Math.max(bestScore, minimax(boardState, false, depth + 1));
+                    boardState[index] = "";
+                });
+
+                return bestScore;
+            }
+
+            let bestScore = Infinity;
+
+            emptyPositions.forEach(function (index) {
+                boardState[index] = "X";
+                bestScore = Math.min(bestScore, minimax(boardState, true, depth + 1));
+                boardState[index] = "";
+            });
+
+            return bestScore;
+        }
+
+        function getDifficultyLabel() {
+            const labels = {
+                easy: "Fácil",
+                medium: "Médio",
+                hard: "Difícil"
+            };
+
+            return labels[difficultySelectValue];
+        }
+
+        /* Cronômetro opcional */
+        function isTimedHumanTurn() {
+            return (
+                timerSelectValue === "10" &&
+                running &&
+                !roundFinished &&
+                (modeSelectValue === "pvp" || currentPlayer === "X")
+            );
+        }
+
+        function startTurnTimer() {
+            stopTurnTimer(false);
+
+            if (!isTimedHumanTurn()) {
+                timerPanel.hidden = true;
+                return;
+            }
+
+            timeLeft = TURN_DURATION;
+            timerPanel.hidden = false;
+            updateTimerDisplay();
+            scheduleTimerTick();
+        }
+
+        function scheduleTimerTick() {
+            turnTimer = setTimeout(function () {
+                turnTimer = null;
+
+                if (!isTimedHumanTurn()) {
+                    stopTurnTimer(true);
+                    return;
+                }
+
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    handleTurnTimeout();
+                    return;
+                }
+
+                if (timeLeft <= 3) {
+                    playTimerTickSound();
+                }
+
+                scheduleTimerTick();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            timerValue.textContent = timeLeft + "s";
+            timerBar.style.width = Math.max(0, (timeLeft / TURN_DURATION) * 100) + "%";
+            timerPanel.classList.toggle("urgent", timeLeft <= 3);
+            timerPanel.setAttribute("aria-label", timeLeft + " segundos restantes para a jogada");
+        }
+
+        function stopTurnTimer(hidePanel) {
+            clearTimeout(turnTimer);
+            turnTimer = null;
+
+            if (hidePanel) {
+                timerPanel.hidden = true;
+                timerPanel.classList.remove("urgent");
+            }
+        }
+
+        function handleTurnTimeout() {
+            const timedOutPlayer = currentPlayer;
+            const timedOutName = "Tempo do Jogador " + timedOutPlayer + " esgotado.";
+            stopTurnTimer(true);
+            playTimeoutSound();
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            syncCellAvailability();
+
+            if (modeSelectValue === "cpu" && currentPlayer === "O") {
+                computerMove(timedOutName);
+            } else {
+                updateStatus(timedOutName);
+            }
+        }
+
+        /* Interface e reset */
+        function updateStatus(prefixMessage) {
+            if (!running) {
+                return;
+            }
+
+            const playerName =
+                modeSelectValue === "cpu" && currentPlayer === "O"
+                    ? "Computador"
+                    : "Jogador " + currentPlayer;
+
+            statusElement.classList.remove("final-message");
+            statusElement.classList.toggle("warning-message", Boolean(prefixMessage));
+            statusElement.textContent =
+                (prefixMessage ? prefixMessage + " " : "") +
+                "Vez do " + playerName;
+
+            startTurnTimer();
+        }
 
         function updateScore() {
-
-            scoreXElement.textContent =
-                winsX;
-
-            scoreOElement.textContent =
-                winsO;
-
+            scoreXElement.textContent = winsX;
+            scoreOElement.textContent = winsO;
         }
-
-
-        /* =========================================================
-           17. ATUALIZA RODADA
-        ========================================================= */
 
         function updateRoundDisplay() {
-
-            if (
-                formatSelectValue === "single"
-            ) {
-
-                roundDisplay.textContent =
-                    "1/1";
-
-                return;
-
-            }
-
-
             roundDisplay.textContent =
-                `${currentRound}/3`;
-
+                formatSelectValue === "single"
+                    ? "1/1"
+                    : currentRound + "/3";
         }
 
+        function resetGame() {
+            clearTimeout(cpuTimer);
+            clearTimeout(roundTimer);
+            stopTurnTimer(true);
+            cpuTimer = null;
+            roundTimer = null;
+            stopConfetti();
 
-        /* =========================================================
-           18. ALTERAÇÃO DO MODO
-        ========================================================= */
+            options = Array(9).fill("");
+            currentPlayer = "X";
+            winsX = 0;
+            winsO = 0;
+            currentRound = 1;
+            running = true;
+            roundFinished = false;
+            activeWinningPattern = null;
 
-        modeSelect.addEventListener(
-            "change",
-            () => {
+            hideWinningLine();
+            statusElement.classList.remove("final-message", "warning-message");
 
-                modeSelectValue =
-                    modeSelect.value;
+            cells.forEach(function (cell, index) {
+                cell.textContent = "";
+                cell.classList.remove("x", "o");
+                cell.setAttribute("aria-label", "Célula " + (index + 1) + ", vazia");
+            });
 
+            syncCellAvailability();
+            updateScore();
+            updateRoundDisplay();
+            updateStatus();
+        }
 
-                /*
-                 * IMPORTANTE:
-                 *
-                 * resetGame() cancela todos
-                 * os timers pendentes.
-                 */
+        /* Linha de vitória */
+        function drawWinningLine(pattern) {
+            const firstRect = cells[pattern[0]].getBoundingClientRect();
+            const lastRect = cells[pattern[2]].getBoundingClientRect();
+            const containerRect = boardContainer.getBoundingClientRect();
 
-                resetGame();
+            const startX = firstRect.left + firstRect.width / 2 - containerRect.left;
+            const startY = firstRect.top + firstRect.height / 2 - containerRect.top;
+            const endX = lastRect.left + lastRect.width / 2 - containerRect.left;
+            const endY = lastRect.top + lastRect.height / 2 - containerRect.top;
+            const deltaX = endX - startX;
+            const deltaY = endY - startY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
+            winLine.style.left = startX + "px";
+            winLine.style.top = (startY - 3.5) + "px";
+            winLine.style.width = distance + "px";
+            winLine.style.transform = "rotate(" + angle + "deg)";
+            winLine.classList.add("visible");
+        }
 
-                if (
-                    modeSelectValue === "cpu"
-                ) {
+        function hideWinningLine() {
+            winLine.classList.remove("visible");
+            winLine.style.width = "0";
+        }
 
-                    playerOLabel.textContent =
-                        "COMPUTADOR";
+        /* Web Audio API: nenhum arquivo externo */
+        let audioContext = null;
 
-                } else {
+        function getAudioContext() {
+            if (!soundEnabled) {
+                return null;
+            }
 
-                    playerOLabel.textContent =
-                        "JOGADOR O";
+            if (!audioContext) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
 
+                if (!AudioContext) {
+                    return null;
                 }
 
+                audioContext = new AudioContext();
             }
-        );
 
-
-        /* =========================================================
-           19. ALTERAÇÃO DO FORMATO
-        ========================================================= */
-
-        formatSelect.addEventListener(
-            "change",
-            () => {
-
-                formatSelectValue =
-                    formatSelect.value;
-
-
-                /*
-                 * Alterar formato reinicia
-                 * completamente a partida.
-                 */
-
-                resetGame();
-
+            if (audioContext.state === "suspended") {
+                audioContext.resume();
             }
-        );
 
+            return audioContext;
+        }
 
-        /* =========================================================
-           20. BOTÃO REINICIAR
-        ========================================================= */
+        function playTone(frequency, duration, type, volume, slideTo) {
+            const ctx = getAudioContext();
 
-        restartButton.addEventListener(
-            "click",
-            () => {
-
-                resetGame();
-
+            if (!ctx) {
+                return;
             }
-        );
 
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const startTime = ctx.currentTime;
 
-        /* =========================================================
-           21. RESET COMPLETO
-        ========================================================= */
+            oscillator.type = type || "sine";
+            oscillator.frequency.setValueAtTime(frequency, startTime);
 
-        function resetGame() {
+            if (slideTo) {
+                oscillator.frequency.exponentialRampToValueAtTime(slideTo, startTime + duration);
+            }
 
-            /*
-             * =====================================================
-             * CORREÇÃO PRINCIPAL
-             * =====================================================
-             *
-             * Cancela o timer da CPU.
-             */
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.exponentialRampToValueAtTime(volume || 0.1, startTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
-            clearTimeout(cpuTimer);
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration + 0.01);
+        }
 
-            cpuTimer = null;
+        function playMoveSound(player) {
+            playTone(player === "X" ? 440 : 330, 0.13, "sine", 0.12);
+        }
 
+        function playWinSound() {
+            [523.25, 659.25, 783.99].forEach(function (frequency, index) {
+                const ctx = getAudioContext();
 
-            /*
-             * Cancela o timer da próxima rodada.
-             */
+                if (!ctx) {
+                    return;
+                }
 
-            clearTimeout(roundTimer);
+                const oscillator = ctx.createOscillator();
+                const gain = ctx.createGain();
+                const startTime = ctx.currentTime + index * 0.11;
 
-            roundTimer = null;
+                oscillator.type = "sine";
+                oscillator.frequency.setValueAtTime(frequency, startTime);
+                gain.gain.setValueAtTime(0.0001, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.15, startTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.36);
+                oscillator.connect(gain);
+                gain.connect(ctx.destination);
+                oscillator.start(startTime);
+                oscillator.stop(startTime + 0.37);
+            });
+        }
 
+        function playDrawSound() {
+            playTone(330, 0.41, "triangle", 0.12, 165);
+        }
 
-            /*
-             * Limpa tabuleiro.
-             */
+        function playTimerTickSound() {
+            playTone(880, 0.07, "square", 0.045);
+        }
 
-            options =
-                Array(9).fill("");
+        function playTimeoutSound() {
+            playTone(220, 0.24, "sawtooth", 0.08, 110);
+        }
 
+        /* Confetes em Canvas, sem bibliotecas */
+        const confettiCanvas = document.getElementById("confettiCanvas");
+        const confettiContext = confettiCanvas.getContext("2d");
+        const confettiColors = ["#003366", "#0056b3", "#d97706", "#16a34a", "#dc2626", "#facc15"];
+        let confettiParticles = [];
+        let confettiAnimation = null;
 
-            /*
-             * X começa.
-             */
+        function resizeConfettiCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
 
-            currentPlayer = "X";
+            if (activeWinningPattern) {
+                drawWinningLine(activeWinningPattern);
+            }
+        }
 
+        window.addEventListener("resize", resizeConfettiCanvas);
+        resizeConfettiCanvas();
 
-            /*
-             * Zera placar.
-             */
-
-            winsX = 0;
-
-            winsO = 0;
-
-
-            /*
-             * Volta para primeira rodada.
-             */
-
-            currentRound = 1;
-
-
-            /*
-             * Libera jogo.
-             */
-
-            running = true;
-
-            roundFinished = false;
-
+        function launchConfetti() {
+            if (reducedMotion) {
+                return;
+            }
 
             stopConfetti();
 
-
-            /*
-             * Esconde linha.
-             */
-
-            hideWinningLine();
-
-
-            /*
-             * Remove mensagem final.
-             */
-
-            statusElement.classList.remove(
-                "final-message"
-            );
-
-
-            /*
-             * Limpa todas as células.
-             */
-
-            cells.forEach(cell => {
-
-                cell.textContent = "";
-
-                cell.disabled = false;
-
-                cell.classList.remove(
-                    "x",
-                    "o"
-                );
-
-            });
-
-
-            /*
-             * Atualiza interface.
-             */
-
-            updateScore();
-
-            updateRoundDisplay();
-
-            updateStatus();
-
-        }
-
-
-        /* =========================================================
-           22. LINHA DE VITÓRIA
-        ========================================================= */
-
-        function drawWinningLine(pattern) {
-
-            const firstCell =
-                cells[pattern[0]];
-
-
-            const lastCell =
-                cells[pattern[2]];
-
-
-            const firstRect =
-                firstCell.getBoundingClientRect();
-
-
-            const lastRect =
-                lastCell.getBoundingClientRect();
-
-
-            const containerRect =
-                boardContainer.getBoundingClientRect();
-
-
-            /*
-             * Centro da primeira célula.
-             */
-
-            const startX =
-                firstRect.left +
-                firstRect.width / 2 -
-                containerRect.left;
-
-
-            const startY =
-                firstRect.top +
-                firstRect.height / 2 -
-                containerRect.top;
-
-
-            /*
-             * Centro da última célula.
-             */
-
-            const endX =
-                lastRect.left +
-                lastRect.width / 2 -
-                containerRect.left;
-
-
-            const endY =
-                lastRect.top +
-                lastRect.height / 2 -
-                containerRect.top;
-
-
-            const deltaX =
-                endX - startX;
-
-
-            const deltaY =
-                endY - startY;
-
-
-            const distance =
-                Math.sqrt(
-                    deltaX * deltaX +
-                    deltaY * deltaY
-                );
-
-
-            const angle =
-                Math.atan2(
-                    deltaY,
-                    deltaX
-                ) *
-                (180 / Math.PI);
-
-
-            /*
-             * =====================================================
-             * CORREÇÃO GEOMÉTRICA
-             * =====================================================
-             *
-             * A linha possui 6px de altura.
-             *
-             * Subtraímos metade da altura
-             * para centralizar exatamente
-             * no ponto calculado.
-             */
-
-            winLine.style.left =
-                `${startX}px`;
-
-
-            winLine.style.top =
-                `${startY - 3}px`;
-
-
-            winLine.style.width =
-                `${distance}px`;
-
-
-            winLine.style.transform =
-                `rotate(${angle}deg)`;
-
-
-            winLine.classList.add(
-                "visible"
-            );
-
-        }
-
-
-        /* =========================================================
-           23. ESCONDER LINHA
-        ========================================================= */
-
-        function hideWinningLine() {
-
-            winLine.classList.remove(
-                "visible"
-            );
-
-            winLine.style.width = "0";
-
-        }
-
-
-        /* =========================================================
-           24. WEB AUDIO API
-        ========================================================= */
-
-        let audioContext = null;
-
-
-        function getAudioContext() {
-
-            if (!audioContext) {
-
-                const AudioContext =
-                    window.AudioContext ||
-                    window.webkitAudioContext;
-
-
-                if (!AudioContext) {
-
-                    return null;
-
-                }
-
-
-                audioContext =
-                    new AudioContext();
-
-            }
-
-
-            if (
-                audioContext.state ===
-                "suspended"
-            ) {
-
-                audioContext.resume();
-
-            }
-
-
-            return audioContext;
-
-        }
-
-
-        /* =========================================================
-           25. SOM DE JOGADA
-        ========================================================= */
-
-        function playMoveSound(player) {
-
-            const ctx =
-                getAudioContext();
-
-
-            if (!ctx) {
-                return;
-            }
-
-
-            const frequency =
-                player === "X"
-                    ? 440
-                    : 330;
-
-
-            const oscillator =
-                ctx.createOscillator();
-
-
-            const gain =
-                ctx.createGain();
-
-
-            oscillator.type = "sine";
-
-
-            oscillator.frequency.value =
-                frequency;
-
-
-            gain.gain.setValueAtTime(
-                0.0001,
-                ctx.currentTime
-            );
-
-
-            gain.gain.exponentialRampToValueAtTime(
-                0.12,
-                ctx.currentTime + 0.01
-            );
-
-
-            gain.gain.exponentialRampToValueAtTime(
-                0.0001,
-                ctx.currentTime + 0.12
-            );
-
-
-            oscillator.connect(gain);
-
-            gain.connect(
-                ctx.destination
-            );
-
-
-            oscillator.start();
-
-
-            oscillator.stop(
-                ctx.currentTime + 0.13
-            );
-
-        }
-
-
-        /* =========================================================
-           26. SOM DE VITÓRIA
-        ========================================================= */
-
-        function playWinSound() {
-
-            const ctx =
-                getAudioContext();
-
-
-            if (!ctx) {
-                return;
-            }
-
-
-            const frequencies = [
-                523.25,
-                659.25,
-                783.99
-            ];
-
-
-            frequencies.forEach(
-                (frequency, index) => {
-
-                    const oscillator =
-                        ctx.createOscillator();
-
-
-                    const gain =
-                        ctx.createGain();
-
-
-                    oscillator.type =
-                        "sine";
-
-
-                    oscillator.frequency.value =
-                        frequency;
-
-
-                    const startTime =
-                        ctx.currentTime +
-                        index * 0.12;
-
-
-                    gain.gain.setValueAtTime(
-                        0.0001,
-                        startTime
-                    );
-
-
-                    gain.gain.exponentialRampToValueAtTime(
-                        0.16,
-                        startTime + 0.02
-                    );
-
-
-                    gain.gain.exponentialRampToValueAtTime(
-                        0.0001,
-                        startTime + 0.35
-                    );
-
-
-                    oscillator.connect(gain);
-
-                    gain.connect(
-                        ctx.destination
-                    );
-
-
-                    oscillator.start(
-                        startTime
-                    );
-
-
-                    oscillator.stop(
-                        startTime + 0.36
-                    );
-
-                }
-            );
-
-        }
-
-
-        /* =========================================================
-           27. SOM DE EMPATE
-        ========================================================= */
-
-        function playDrawSound() {
-
-            const ctx =
-                getAudioContext();
-
-
-            if (!ctx) {
-                return;
-            }
-
-
-            const oscillator =
-                ctx.createOscillator();
-
-
-            const gain =
-                ctx.createGain();
-
-
-            oscillator.type =
-                "triangle";
-
-
-            oscillator.frequency.setValueAtTime(
-                330,
-                ctx.currentTime
-            );
-
-
-            oscillator.frequency.exponentialRampToValueAtTime(
-                165,
-                ctx.currentTime + 0.4
-            );
-
-
-            gain.gain.setValueAtTime(
-                0.0001,
-                ctx.currentTime
-            );
-
-
-            gain.gain.exponentialRampToValueAtTime(
-                0.12,
-                ctx.currentTime + 0.02
-            );
-
-
-            gain.gain.exponentialRampToValueAtTime(
-                0.0001,
-                ctx.currentTime + 0.4
-            );
-
-
-            oscillator.connect(gain);
-
-            gain.connect(
-                ctx.destination
-            );
-
-
-            oscillator.start();
-
-            oscillator.stop(
-                ctx.currentTime + 0.41
-            );
-
-        }
-
-
-        /* =========================================================
-           28. CONFETES
-        ========================================================= */
-
-        const confettiCanvas =
-            document.getElementById(
-                "confettiCanvas"
-            );
-
-
-        const confettiContext =
-            confettiCanvas.getContext(
-                "2d"
-            );
-
-
-        let confettiParticles = [];
-
-        let confettiAnimation = null;
-
-
-        function resizeConfettiCanvas() {
-
-            confettiCanvas.width =
-                window.innerWidth;
-
-            confettiCanvas.height =
-                window.innerHeight;
-
-        }
-
-
-        window.addEventListener(
-            "resize",
-            resizeConfettiCanvas
-        );
-
-
-        resizeConfettiCanvas();
-
-
-        function launchConfetti() {
-
-            confettiParticles = [];
-
-
-            for (
-                let i = 0;
-                i < 180;
-                i++
-            ) {
-
+            for (let index = 0; index < 180; index++) {
                 confettiParticles.push({
-
-                    x:
-                        Math.random() *
-                        confettiCanvas.width,
-
-                    y:
-                        -20 -
-                        Math.random() *
-                        confettiCanvas.height,
-
-                    width:
-                        5 +
-                        Math.random() * 7,
-
-                    height:
-                        8 +
-                        Math.random() * 10,
-
-                    speed:
-                        2 +
-                        Math.random() * 4,
-
-                    drift:
-                        -2 +
-                        Math.random() * 4,
-
-                    rotation:
-                        Math.random() * 360,
-
-                    rotationSpeed:
-                        -5 +
-                        Math.random() * 10
-
+                    x: Math.random() * confettiCanvas.width,
+                    y: -20 - Math.random() * confettiCanvas.height,
+                    width: 5 + Math.random() * 7,
+                    height: 8 + Math.random() * 10,
+                    speed: 2 + Math.random() * 4,
+                    drift: -2 + Math.random() * 4,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: -5 + Math.random() * 10,
+                    color: confettiColors[Math.floor(Math.random() * confettiColors.length)]
                 });
-
             }
-
-
-            if (confettiAnimation) {
-
-                cancelAnimationFrame(
-                    confettiAnimation
-                );
-
-            }
-
 
             animateConfetti();
-
         }
-
 
         function stopConfetti() {
-
             if (confettiAnimation) {
-
-                cancelAnimationFrame(
-                    confettiAnimation
-                );
-
+                cancelAnimationFrame(confettiAnimation);
                 confettiAnimation = null;
-
             }
-
 
             confettiParticles = [];
-
-
-            confettiContext.clearRect(
-                0,
-                0,
-                confettiCanvas.width,
-                confettiCanvas.height
-            );
-
+            confettiContext.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
         }
-
 
         function animateConfetti() {
-
-            confettiContext.clearRect(
-                0,
-                0,
-                confettiCanvas.width,
-                confettiCanvas.height
-            );
-
-
+            confettiContext.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
             let activeParticles = 0;
 
+            confettiParticles.forEach(function (particle) {
+                particle.y += particle.speed;
+                particle.x += particle.drift;
+                particle.rotation += particle.rotationSpeed;
 
-            confettiParticles.forEach(
-                particle => {
-
-                    particle.y +=
-                        particle.speed;
-
-                    particle.x +=
-                        particle.drift;
-
-                    particle.rotation +=
-                        particle.rotationSpeed;
-
-
-                    if (
-                        particle.y <
-                        confettiCanvas.height + 30
-                    ) {
-
-                        activeParticles++;
-
-                    }
-
-
-                    confettiContext.save();
-
-
-                    confettiContext.translate(
-                        particle.x,
-                        particle.y
-                    );
-
-
-                    confettiContext.rotate(
-                        particle.rotation *
-                        Math.PI /
-                        180
-                    );
-
-
-                    /*
-                     * Usa cores geradas
-                     * dinamicamente.
-                     */
-
-                    const hue =
-                        Math.floor(
-                            Math.random() * 360
-                        );
-
-
-                    confettiContext.fillStyle =
-                        `hsl(${hue}, 80%, 55%)`;
-
-
-                    confettiContext.fillRect(
-                        -particle.width / 2,
-                        -particle.height / 2,
-                        particle.width,
-                        particle.height
-                    );
-
-
-                    confettiContext.restore();
-
+                if (particle.y < confettiCanvas.height + 30) {
+                    activeParticles++;
                 }
-            );
 
+                confettiContext.save();
+                confettiContext.translate(particle.x, particle.y);
+                confettiContext.rotate(particle.rotation * Math.PI / 180);
+                confettiContext.fillStyle = particle.color;
+                confettiContext.fillRect(
+                    -particle.width / 2,
+                    -particle.height / 2,
+                    particle.width,
+                    particle.height
+                );
+                confettiContext.restore();
+            });
 
             if (activeParticles > 0) {
-
-                confettiAnimation =
-                    requestAnimationFrame(
-                        animateConfetti
-                    );
-
+                confettiAnimation = requestAnimationFrame(animateConfetti);
             } else {
-
-                confettiContext.clearRect(
-                    0,
-                    0,
-                    confettiCanvas.width,
-                    confettiCanvas.height
-                );
-
-                confettiAnimation = null;
-
+                stopConfetti();
             }
-
         }
 
-
-        /* =========================================================
-           29. INICIALIZAÇÃO
-        ========================================================= */
-
-        updateScore();
-
-        updateRoundDisplay();
-
-        updateStatus();
-
+        /* Estado inicial especificado pelo CDU */
+        difficultyField.hidden = true;
+        resetGame();
     </script>
-
 </body>
-
 </html>
