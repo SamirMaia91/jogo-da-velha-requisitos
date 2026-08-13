@@ -5,7 +5,7 @@
 Uma experiência completa de Jogo da Velha, construída em HTML, CSS e JavaScript puro a partir de uma especificação formal de requisitos.
 
 
-👥 Integrantes do projeto
+## 👥 Integrantes do projeto
 Samir
 Mario
 Fabiellen
