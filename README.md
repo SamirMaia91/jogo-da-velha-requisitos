@@ -4,6 +4,15 @@
 
 Uma experiência completa de Jogo da Velha, construída em HTML, CSS e JavaScript puro a partir de uma especificação formal de requisitos.
 
+
+👥 Integrantes do projeto
+Samir
+Mario
+Fabiellen
+Ana Gabriella
+
+
+
 [![Versão](https://img.shields.io/badge/versão-1.2-003366)](./docs/cdu_JogarJogodavelha.md)
 [![Testes](https://img.shields.io/badge/testes-40%20verificações-15803d)](./tests/game.test.mjs)
 [![Dependências](https://img.shields.io/badge/dependências-zero-d97706)](./src/index.html)
